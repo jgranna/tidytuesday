@@ -1,0 +1,45 @@
+---
+title: "deforestation"
+output: html_document
+---
+
+## Deforestation 
+
+Load libraries and data:
+```{r}
+library(tidytuesdayR)
+library(ggplot2)
+library(ggthemes)
+tuesdata <- tt_load('2021-04-06')
+```
+
+Share of global forest area per continent over time
+---------------------------------------------------
+
+Select only continents
+```{r}
+continent_shares <- subset(tuesdata$forest_area, entity == "Europe" | entity == "Asia" | entity == "Africa" | entity == "South America" | entity == "Oceania" | entity == "North America")
+```
+
+Create new variable to indicate time windows and aggregate 
+
+```{r}
+continent_shares$cut <- cut(continent_shares$year, breaks = quantile(continent_shares$year, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)), include.lowest =  T)
+agg <- aggregate(continent_shares$forest_area, by = list(continent_shares$cut, continent_shares$entity), FUN = mean)
+names(agg) <- c("time", "continent", "share")
+```
+
+Visualize change in change of global forest share over time
+
+```{r}
+g <- ggplot(agg, aes(x = time, y = share, fill = continent)) +
+      geom_bar(stat = "identity")
+g
+```
+Change layout:
+
+```{r}
+g <- g + scale_fill_tableau(palette = "Tableau 20") + 
+       theme_minimal()
+g
+```

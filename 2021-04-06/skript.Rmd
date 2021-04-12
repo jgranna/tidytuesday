@@ -1,45 +1,144 @@
 ---
-title: "deforestation"
+title: "Deforestation"
 output: html_document
 ---
 
-## Deforestation 
-
-Load libraries and data:
-```{r}
+```{r, include=FALSE}
 library(tidytuesdayR)
 library(ggplot2)
 library(ggthemes)
+library(ggstream)
+library(cowplot)
+library(streamgraph)
+library(showtext)
+library(ggtext)
+library(scales)
+library(tidyr)
 tuesdata <- tt_load('2021-04-06')
+#load('/home/julian/Desktop/tuesdata.rda')
+font_add_google("Dosis", "dosis")
+knitr::opts_chunk$set(fig.width=9.5, fig.height=5) 
 ```
 
-Share of global forest area per continent over time
----------------------------------------------------
+## Worldwide soy production over time
 
-Select only continents
-```{r}
+Streamgraph for soy production per continent:
+
+```{r, echo = FALSE}
+theme_set(theme_minimal(base_size = 11, base_family = 'dosis'))
+continent_soy <- subset(tuesdata$soybean_use, entity == "Europe" | entity == "Asia" | entity == "Africa" | entity == "South America" | entity == "Oceania" | entity == "North America")
+continent_soy$sum <- (continent_soy$human_food + continent_soy$animal_feed + continent_soy$processed) / 1000000
+# bw controls smoothness of stream
+theme_set(theme_minimal(base_size = 11, base_family = 'dosis'))
+g <- ggplot(continent_soy, aes(year, sum, fill = entity, label = entity)) +
+  geom_stream(extra_span = 0.008, n_grid = 200, bw = .6) + theme_minimal_vgrid(font_size = 14) +
+  scale_fill_tableau(palette = "Classic Cyclic") +
+  labs(x = '**year**', 
+       y = '**total soy production** (million tonnes)', 
+       title = 'Worldwide Soy Production', 
+       subtitle = 'Shown for all continent (except Antarctica)', 
+       caption = '**Data**: Hannah Ritchie and Max Roser (2021) - Forests and Deforestation. *OurWorldInData.org*',
+       fill = NULL) +
+  theme(legend.position = 'top', 
+        plot.title.position = 'plot',
+        axis.title.x = element_markdown(),
+        axis.title.y = element_markdown(), 
+        plot.caption = element_markdown(margin = margin(t = 15)),
+        plot.title = element_markdown()) +
+  scale_y_continuous(labels = comma)
+g
+```
+
+The global production of soy has increased rapidly over the last 60 years. Europe's share in global production is stagnating and stable since around 1980. Growth in soy production mainly stems from production increases in Asia and South America.
+
+## Interactive Streamgraph
+```{r, echo = FALSE, warning=FALSE}
+pp <- streamgraph(continent_soy, key="entity", value="sum", date="year", height="300px", width="1000px") %>%
+  sg_fill_brewer("PuOr") %>% 
+  sg_legend(show=TRUE)
+pp
+```
+
+## Brazilian Forest Loss
+
+To get a picture of total forest loss next to forest loss and its causes, it is useful to again regard the corresponding streamgraph:
+
+```{r, echo = FALSE}
+# get into tidy format:
+tuesdata$brazil_loss <- tuesdata$brazil_loss[, -c(1, 2)]
+forests <- tuesdata$brazil_loss %>% pivot_longer(!year, names_to = "cause", values_to = "area")
+forests$area <- forests$area / 1000000
+forests$cause[
+  forests$cause == 'flooding_due_to_dams' |
+  forests$cause == 'mining' |
+  forests$cause == 'natural_disturbances' |
+  forests$cause == 'other_infrastructure'
+  ] <- 'other cause'
+agg <- aggregate(forests$area[forests$cause == 'other cause'], by = list(forests$year[forests$cause == 'other cause'], forests$cause[forests$cause == 'other cause']), FUN = mean)
+names(agg) <- names(forests)
+forests <- forests[forests$cause != 'other cause', ]
+forests <- rbind(forests, agg)
+# relabel categories
+forests$cause[forests$cause == 'commercial_crops'] <- "commercial crops"
+forests$cause[forests$cause == 'selective_logging'] <- "selective logging"
+forests$cause[forests$cause == 'commercial_crops'] <- "commercial crops"
+forests$cause[forests$cause == 'small_scale_clearing'] <- "small scale clearing"
+forests$cause[forests$cause == 'tree_plantations_including_palm'] <- "plantations (incl. palm)"
+# plotting
+brazil <- ggplot(forests, aes(year, area, fill = cause, label = cause)) +
+  geom_stream(extra_span = 0.002, n_grid = 100, bw = .8) + theme_minimal_vgrid(font_size = 14) +
+  scale_fill_tableau(palette = "Classic Cyclic") +
+  labs(x = '**year**', 
+       y = '**forest loss** (million ha)', 
+       title = 'Loss of Brazilian Forest', 
+       subtitle = 'Split up for specific causes', 
+       caption = '**Data**: Hannah Ritchie and Max Roser (2021) - Forests and Deforestation. *OurWorldInData.org*',
+       fill = NULL) +
+  theme(legend.position = 'top', 
+        plot.title.position = 'plot',
+        axis.title.x = element_markdown(),
+        axis.title.y = element_markdown(), 
+        plot.caption = element_markdown(margin = margin(t = 15)),
+        plot.title = element_markdown()) 
+brazil
+```
+The graph shows that total forest loss between 2001 and 2004 is much higher than in more recent years. This corresponds to evolution of forest losses in other countries with increasing development. This trend however, could (temporarily) reverse in more recent years due to less regulatory restrictions. 
+Pasture is the major cause of forest loss in Brazil. This is true over the whole time horizon. However, the share has been decreasing in recent years. Other causes, like fire, roads, or plantations including palm oil, play a much smaller - but also substantial - role.
+
+## Share of global forest area per continent over time
+
+```{r, echo = FALSE, results='hide'}
 continent_shares <- subset(tuesdata$forest_area, entity == "Europe" | entity == "Asia" | entity == "Africa" | entity == "South America" | entity == "Oceania" | entity == "North America")
-```
-
-Create new variable to indicate time windows and aggregate 
-
-```{r}
 continent_shares$cut <- cut(continent_shares$year, breaks = quantile(continent_shares$year, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1)), include.lowest =  T)
 agg <- aggregate(continent_shares$forest_area, by = list(continent_shares$cut, continent_shares$entity), FUN = mean)
 names(agg) <- c("time", "continent", "share")
 ```
 
-Visualize change in change of global forest share over time
+Visualize change in change of global forest share over time:
 
-```{r}
+```{r, echo = FALSE}
 g <- ggplot(agg, aes(x = time, y = share, fill = continent)) +
       geom_bar(stat = "identity")
+g <- g + scale_fill_tableau(palette = "Classic Cyclic")  +
+  labs(
+    title = "**Share of global forest area of continents**",
+    x = "**years**",
+    y = "**share of global forest area** (percent)",
+    fill = NULL,
+    caption = '**Data**: Hannah Ritchie and Max Roser (2021) - Forests and Deforestation. *OurWorldInData.org*'
+  ) +
+  theme(
+    plot.title.position = 'plot',
+    plot.title = element_markdown(),
+    axis.title.x = element_markdown(),
+    axis.title.y = element_markdown(), 
+    legend.position = 'top',
+    plot.caption = element_markdown(margin = margin(t = 15)),
+  ) 
 g
 ```
-Change layout:
+The share of each continents' forest area of the world's total forest area has not changed substantially over the last 30 years.
 
-```{r}
-g <- g + scale_fill_tableau(palette = "Tableau 20") + 
-       theme_minimal()
-g
-```
+-----------------------------
+
+Full R code available at <https://github.com/jgranna/tidytuesday>

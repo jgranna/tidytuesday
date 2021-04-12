@@ -15,7 +15,6 @@ library(ggtext)
 library(scales)
 library(tidyr)
 tuesdata <- tt_load('2021-04-06')
-#load('/home/julian/Desktop/tuesdata.rda')
 font_add_google("Dosis", "dosis")
 knitr::opts_chunk$set(fig.width=9.5, fig.height=5) 
 ```

@@ -1,0 +1,92 @@
+---
+title: 'US Post Offices'
+output: html_document
+---
+
+## Tidy Tuesday
+
+This is my second contribution to TidyTuesday, which is 'a weekly podcast and community activity brought to you by the R4DS Online Learning Community'. Their goal is to help R learners learn in real-world contexts. 
+
+For more information, visit the [TidyTuesday homepage](https://www.tidytuesday.com/), check out their [GitHub repository](https://github.com/rfordatascience/tidytuesday) and follow the [R4DS Learning Community on Twitter](https://twitter.com/R4DScommunity).
+
+```{r, include=FALSE}
+library(tidytuesdayR)
+library(ggplot2)
+library(ggrepel)
+library(maps)
+library(tidyverse)
+library(showtext)
+library(ggtext)
+library(colorspace)
+library(gitcreds)
+library(sf)
+knitr::opts_chunk$set(fig.width=9.5, fig.height=5) 
+tuesdata <- tt_load('2021-04-13')
+# filter data
+tuesdata$post_offices <- 
+  tuesdata$post_offices %>% 
+  drop_na(established) %>% # leave out NA established data
+  filter(established >= 1639) %>% # leave out est. years < 1639 & disc. == 997
+  filter(discontinued != 997 | is.na(discontinued)) %>%
+  filter(state != "MI/OH" & state != "VAy" & state != "AK" & state != "HI") # leave out not surely attributable states
+```
+
+## US Post Office Data Set
+
+This week's data originates from [Cameron Blevins and Richard W. Helbock](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/NUKCNA). It covers information on US Post Offices established between 1639 and 2000. It allows to track the development of Post Offices in the US over time.
+
+### Number of established Post Offices in each state
+
+To gain a first overview, I first regard the number of established Post Offices in each state:
+
+```{r, include = FALSE}
+us_states <- tigris::states(class = "sf", cb = T) %>% 
+  filter(STUSPS != "AK" & STUSPS != "HI" & STUSPS != "MP" & STUSPS != "VI" & STUSPS != "PR" & STUSPS != "AS" & STUSPS != "GU")
+tab  <- data.frame(table(tuesdata$post_offices$state))
+names(tab) <- c("STUSPS", "freq")
+mean_map <- inner_join(us_states, tab, by = "STUSPS")
+```
+```{r, echo = FALSE}
+# calculate centroids for US states
+st_centroid_within_poly <- function (poly) {
+  # check if centroid is in polygon
+  centroid <- poly %>% st_centroid() 
+  in_poly <- st_within(centroid, poly, sparse = F)[[1]] 
+  # if it is, return that centroid
+  if (in_poly) return(centroid) 
+  # if not, calculate a point on the surface and return that
+  centroid_in_poly <- st_point_on_surface(poly) 
+  return(centroid_in_poly)
+}
+state_codes <- us_states  %>% 
+  mutate(lon = map_dbl(geometry, ~st_centroid_within_poly(.x)[[1]]),
+         lat = map_dbl(geometry, ~st_centroid_within_poly(.x)[[2]]))
+
+font_add_google("Dosis", "dosis")
+theme_set(theme_void(base_family = 'dosis'))
+g <- ggplot(mean_map) +
+       geom_sf(aes(fill = freq)) +
+       geom_text_repel(data=state_codes, aes(x=lon, y=lat, label=STUSPS), size=3, color = 'black') +
+       scale_fill_binned_sequential(palette = "Heat 2") +
+       labs(
+         title = "**Number of Established Post Offices in the US**",
+         subtitle = "In the years 1639 to 2000",
+         fill = "**number of offices**"
+        ) +
+       theme(
+         plot.title = element_markdown(),
+         legend.title = element_markdown(),
+         legend.position = "bottom"
+       ) +
+       guides(
+         fill = guide_colorsteps(title.position = 'bottom', even.steps = TRUE, barwidth = 20, barheight = 0.5,
+                                  title.hjust = .5)
+       )
+g
+```
+The coordinates of the states' labels would need some more fixing. It is apparent that the majority of post offices is accumulated in the coastal regions and densely populated areas. 
+
+## References
+
+Blevins, Cameron; Helbock, Richard W., 2021, "US Post Offices", <https://doi.org/10.7910/DVN/NUKCNA>, Harvard Dataverse, V1, UNF:6:8ROmiI5/4qA8jHrt62PpyA== [fileUNF]
+

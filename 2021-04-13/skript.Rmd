@@ -100,8 +100,8 @@ names(tab) <- c("STUSPS", "freq")
 mean_map <- inner_join(us_states, tab, by = "STUSPS")
 ```
 ```{r, echo = FALSE}
-#codes <- read.csv("https://raw.githubusercontent.com/jgranna/tidytuesday/main/2021-04-13/data/states.csv")
-codes <- read.csv("~/git/github/tidytuesday/2021-04-13/data/states.csv")
+codes <- read.csv("https://raw.githubusercontent.com/jgranna/tidytuesday/main/2021-04-13/data/states.csv")
+#codes <- read.csv("~/git/github/tidytuesday/2021-04-13/data/states.csv")
 showtext_auto()
 g <- ggplot(mean_map) +
        geom_sf(aes(fill = freq)) +
@@ -131,8 +131,11 @@ g
 The coordinates of the states' labels would need some more fixing. It is apparent that the majority of post offices is accumulated in the coastal regions and densely populated areas. 
 
 ### Density of US Post Offices Along railroads
+
+Railroads played an important role in the context of expansion of colonies especially in the 19th century. The following plot demonstrates this.
+
 ```{r, include=FALSE}
-railroads <- read_sf("~/Downloads/RR1826-1911Modified0509161/RR1826-1911Modified050916.shx")
+railroads <- st_read("data/RR1826-1911Modified0509161/RR1826-1911Modified050916.shx")
 railroads <- railroads %>% filter(InOpBy >= 1848 & InOpBy <= 1895)
 ```
 ```{r, echo=FALSE}
@@ -192,14 +195,18 @@ density_map
 #dev.off()
 ```
 
+The highest density of Post Offices is close to good infrastructure in terms of railroads. 
+
 ---------------------------------------------
 
 ## References
 
-**Main data set**
+**Main data set**:
+
 Blevins, Cameron; Helbock, Richard W., 2021, "US Post Offices", <https://doi.org/10.7910/DVN/NUKCNA>, Harvard Dataverse, V1, UNF:6:8ROmiI5/4qA8jHrt62PpyA== [fileUNF]
 
-**Railroad network**
+**Railroad network**:
+
 Jeremy Atack, [“Historical Geographic Information Systems (GIS) database of U.S. Railroads for 1848 to 1895"](https://my.vanderbilt.edu/jeremyatack/data-downloads/)
 
 --------------------------------------------------

@@ -20,15 +20,18 @@ library(ggtext)
 library(colorspace)
 library(gitcreds)
 library(sf)
-knitr::opts_chunk$set(fig.width=9.5, fig.height=5) 
-tuesdata <- tt_load('2021-04-13')
+library(ggpointdensity)
+knitr::opts_chunk$set(fig.width=9, fig.height=6) 
+# use data with random points
+random_data <- read.csv("https://raw.githubusercontent.com/cblevins/us-post-offices/main/us-post-offices-random-coords.csv")
 # filter data
-tuesdata$post_offices <- 
-  tuesdata$post_offices %>% 
-  drop_na(established) %>% # leave out NA established data
-  filter(established >= 1639) %>% # leave out est. years < 1639 & disc. == 997
-  filter(discontinued != 997 | is.na(discontinued)) %>%
-  filter(state != "MI/OH" & state != "VAy" & state != "AK" & state != "HI") # leave out not surely attributable states
+random_data <- 
+  random_data %>% 
+  drop_na(Established) %>% # leave out NA established data
+  filter(Established >= 1639) %>% # leave out est. years < 1639 & disc. == 997
+  filter(Discontinued != 997 | is.na(Discontinued)) %>%
+  filter(State != "MI/OH" & State != "VAy" & State != "AK" & State != "HI") %>%# leave out not surely attributable states
+  drop_na(Latitude) # drop not geocoded vars
 ```
 
 ## Tidy Tuesday
@@ -41,60 +44,163 @@ For more information, visit the [TidyTuesday homepage](https://www.tidytuesday.c
 
 This week's data originates from [Cameron Blevins and Richard W. Helbock](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/NUKCNA). It covers information on US Post Offices established between 1639 and 2000. It allows to track the development of Post Offices in the US over time.
 
+### US Post Offices Scatter
+
+One could obtain a first idea about the data by regarding a scatter plot of the Post Offices over the whole time horizon:
+
+```{r, include=FALSE}
+us_map <- tigris::nation(class = "sf")
+```
+```{r, echo=FALSE}
+font_add_google("Oswald", "oswald")
+font_add_google("Barlow Condensed", "barlow")
+showtext_auto()
+theme_set(theme_minimal(base_size = 25, base_family = 'barlow'))
+
+scatter_map <- ggplot(us_map) +
+  geom_sf(fill = "white") + coord_sf(xlim = c(-125, -68), ylim = c(25, 50)) +
+  geom_point(
+    data = random_data, 
+    aes(y = Latitude, x = Longitude, color = RandomCoordsFlag), 
+    size = 0.01, 
+    alpha = 0.1
+  ) + 
+  scale_color_discrete_qualitative(palette = "Dynamic") +
+  labs(
+    title = "**Scatter Plot of US Post Offices**",
+    subtitle = "Established between 1639 and 2000", 
+    caption = "**Data**: Blevins, Cameron; Helbock, Richard W., 2021, 'US Post Offices'",
+    color = "random coordinates"
+  ) +
+  theme(
+    plot.title = element_markdown(),
+    plot.caption = element_markdown(),
+    legend.position = "bottom",
+    plot.title.position = "plot",
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank()
+  ) + 
+  guides(
+    color = guide_legend(override.aes = list(size = 6, alpha = 1))
+  )
+scatter_map
+```
+
+Generally, more post offices are located in the east than in the west. $32\%$ of the points are randomly located within their corresponding county, because no exact geocoding is available. Because it is more important here to illustrate the number of observations and the rough locational distribution, we do include the randomly located offices.
+
 ### Number of established Post Offices in each state
 
-To gain a first overview, I first regard the number of established Post Offices in each state:
+To gain a further overview over the overall distribution of offices, I first regard the number of established Post Offices in each state:
 
 ```{r, include = FALSE}
 us_states <- tigris::states(class = "sf", cb = T) %>% 
   filter(STUSPS != "AK" & STUSPS != "HI" & STUSPS != "MP" & STUSPS != "VI" & STUSPS != "PR" & STUSPS != "AS" & STUSPS != "GU")
-tab  <- data.frame(table(tuesdata$post_offices$state))
+tab  <- data.frame(table(random_data$State))
 names(tab) <- c("STUSPS", "freq")
 mean_map <- inner_join(us_states, tab, by = "STUSPS")
 ```
 ```{r, echo = FALSE}
-# calculate centroids for US states
-st_centroid_within_poly <- function (poly) {
-  # check if centroid is in polygon
-  centroid <- poly %>% st_centroid() 
-  in_poly <- st_within(centroid, poly, sparse = F)[[1]] 
-  # if it is, return that centroid
-  if (in_poly) return(centroid) 
-  # if not, calculate a point on the surface and return that
-  centroid_in_poly <- st_point_on_surface(poly) 
-  return(centroid_in_poly)
-}
-state_codes <- us_states  %>% 
-  mutate(lon = map_dbl(geometry, ~st_centroid_within_poly(.x)[[1]]),
-         lat = map_dbl(geometry, ~st_centroid_within_poly(.x)[[2]]))
-
-font_add_google("Dosis", "dosis")
-theme_set(theme_void(base_family = 'dosis'))
+#codes <- read.csv("https://raw.githubusercontent.com/jgranna/tidytuesday/main/2021-04-13/data/states.csv")
+codes <- read.csv("~/git/github/tidytuesday/2021-04-13/data/states.csv")
+showtext_auto()
 g <- ggplot(mean_map) +
        geom_sf(aes(fill = freq)) +
-       geom_text_repel(data=state_codes, aes(x=lon, y=lat, label=STUSPS), size=3, color = 'black') +
+       geom_text_repel(data=codes, aes(x=lon, y=lat, label=state), size=3, color = 'black',family = "oswald") +
        scale_fill_binned_sequential(palette = "Heat 2") +
        labs(
          title = "**Number of Established Post Offices in the US**",
          subtitle = "In the years 1639 to 2000",
-         fill = "**number of offices**"
+         fill = "**number of offices**", 
+         caption = "**Data**: Blevins, Cameron; Helbock, Richard W., 2021, 'US Post Offices'"
         ) +
        theme(
          plot.title = element_markdown(),
          legend.title = element_markdown(),
-         legend.position = "bottom"
+         legend.position = "bottom",
+         axis.title.x = element_blank(),
+         axis.title.y = element_blank(),
+         plot.caption = element_markdown()
        ) +
        guides(
          fill = guide_colorsteps(title.position = 'bottom', even.steps = TRUE, barwidth = 20, barheight = 0.5,
                                   title.hjust = .5)
-       )
+       ) 
 g
 ```
+
 The coordinates of the states' labels would need some more fixing. It is apparent that the majority of post offices is accumulated in the coastal regions and densely populated areas. 
+
+### Density of US Post Offices Along railroads
+```{r, include=FALSE}
+railroads <- read_sf("~/Downloads/RR1826-1911Modified0509161/RR1826-1911Modified050916.shx")
+railroads <- railroads %>% filter(InOpBy >= 1848 & InOpBy <= 1895)
+```
+```{r, echo=FALSE}
+font_add_google("Lobster", "lobster")
+font_add_google("Dancing Script", "dancing")
+theme_set(theme_minimal(base_size = 13, base_family = 'dancing'))
+early <- random_data %>% filter(Established <= 1895 & Established >= 1848) %>%
+  filter(State == "CA" | State == "WA" | State == "OR" | State == "NV" | State == "ID" | State == "MT" |
+           State == "WY" | State == "ND" | State == "KS" | State == "CO" | State == "NE" | State == "TX" |
+           State == "AZ" | State == "UT" | State == "SD" | State == "NM" | State == "OK")
+opp_us <- us_states %>% filter(
+  STUSPS != "CA" & STUSPS != "WA" & STUSPS != "OR" & STUSPS != "NV" & STUSPS != "ID" & STUSPS != "MT" &
+           STUSPS != "WY" & STUSPS != "ND" & STUSPS != "KS" & STUSPS != "CO" & STUSPS != "NE" & STUSPS != "TX" &
+           STUSPS != "AZ" & STUSPS != "UT" & STUSPS != "SD" & STUSPS != "NM" & STUSPS != "OK")
+density_map <- ggplot(us_states) +
+  geom_sf(fill = "white") + 
+  geom_point(data = early, aes(y = Latitude, x = Longitude), size = 0.1, alpha = 0.1, color = "#0056A1") +
+  geom_sf(data = railroads, color = "#004801") +
+  geom_sf(data = opp_us, fill = "white") +
+  coord_sf(xlim = c(-125, -93), ylim = c(25, 50)) +
+  geom_pointdensity(
+    data = early, 
+    aes(y = Latitude, x = Longitude),
+    size = 1.5,
+    adjust = 0.2,
+    alpha = 0.07
+  ) + 
+  scale_color_binned_sequential(palette = "Purple-Yellow", 
+                                name = "no. of neighbors",
+                                guide = guide_colorsteps(title.position = 'bottom', 
+                                                         even.steps = TRUE, 
+                                                         barwidth = 10, 
+                                                         barheight = 0.3,
+                                                         title.hjust = .5
+                                                         )
+                                ) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_markdown(size = 12),
+    plot.title = element_markdown(size = 19),
+    plot.subtitle = element_markdown(size = 14),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    plot.caption = element_markdown(),
+    panel.background = element_rect(fill = NA),
+    plot.background = element_rect(fill = "#FFEADA",
+                                   color = "#FFEADA", size = 2)
+  ) +
+  labs(
+    title = "<span style='font-weight:700;'>US Post Office Density Around Railroads</span>",
+    subtitle = "For years 1848 to 1895", 
+    caption = "**Data**: Blevins, Cameron; Helbock, Richard W., 2021, 'US Post Offices'"
+  ) 
+density_map
+#pdf("~/Desktop/railroads.pdf", width = 5.7, height = 7)
+#density_map
+#dev.off()
+```
+
+---------------------------------------------
 
 ## References
 
+**Main data set**
 Blevins, Cameron; Helbock, Richard W., 2021, "US Post Offices", <https://doi.org/10.7910/DVN/NUKCNA>, Harvard Dataverse, V1, UNF:6:8ROmiI5/4qA8jHrt62PpyA== [fileUNF]
+
+**Railroad network**
+Jeremy Atack, [“Historical Geographic Information Systems (GIS) database of U.S. Railroads for 1848 to 1895"](https://my.vanderbilt.edu/jeremyatack/data-downloads/)
 
 --------------------------------------------------
 

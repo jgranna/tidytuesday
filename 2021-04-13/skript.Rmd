@@ -31,6 +31,12 @@ tuesdata$post_offices <-
   filter(state != "MI/OH" & state != "VAy" & state != "AK" & state != "HI") # leave out not surely attributable states
 ```
 
+## Tidy Tuesday
+
+This is my second contribution to TidyTuesday, which is 'a weekly podcast and community activity brought to you by the R4DS Online Learning Community'. Their goal is to help R learners learn in real-world contexts. 
+
+For more information, visit the [TidyTuesday homepage](https://www.tidytuesday.com/), check out their [GitHub repository](https://github.com/rfordatascience/tidytuesday) and follow the [R4DS Learning Community on Twitter](https://twitter.com/R4DScommunity).
+
 ## US Post Office Data Set
 
 This week's data originates from [Cameron Blevins and Richard W. Helbock](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/NUKCNA). It covers information on US Post Offices established between 1639 and 2000. It allows to track the development of Post Offices in the US over time.
@@ -90,3 +96,6 @@ The coordinates of the states' labels would need some more fixing. It is apparen
 
 Blevins, Cameron; Helbock, Richard W., 2021, "US Post Offices", <https://doi.org/10.7910/DVN/NUKCNA>, Harvard Dataverse, V1, UNF:6:8ROmiI5/4qA8jHrt62PpyA== [fileUNF]
 
+--------------------------------------------------
+
+Full R code available at <https://github.com/jgranna/tidytuesday>

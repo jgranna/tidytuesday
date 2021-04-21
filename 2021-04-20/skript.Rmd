@@ -1,0 +1,151 @@
+---
+title: "Netflix"
+output: html_document
+---
+
+```{r setup, include=FALSE, cache=TRUE}
+library(tidyverse)
+library(gggibbous)
+netflix <- tidytuesdayR::tt_load("2021-04-20")
+netflix <- netflix$netflix_titles %>% 
+  drop_na(date_added)
+```
+
+## Tidy Tuesday
+
+This is my third contribution to TidyTuesday, which is 'a weekly podcast and community activity brought to you by the R4DS Online Learning Community'. Their goal is to help R learners learn in real-world contexts. 
+
+For more information, visit the [TidyTuesday homepage](https://www.tidytuesday.com/), check out their [GitHub repository](https://github.com/rfordatascience/tidytuesday) and follow the [R4DS Learning Community on Twitter](https://twitter.com/R4DScommunity).
+
+The purpose of these posts is mainly for exercising purposes. Thus, the provided graphs are not necessarily designed to provide the greatest possible insights. However, I always provide the R code for interested people at the page bottom.
+
+### Added Number of shows and movies and their ratio
+
+Netflix provides an increasing number of movies and TV shows in their data base. In order to gain insights by how much the total number of TV shows and movies has increased and whether the TV show / movie overall ratio has changed, I provide the following plot. For this week's data I use the `gggibbous` package which includes so-called "moon graphs".
+
+```{r, include=FALSE}
+library(tidyverse)
+library(gggibbous)
+library(scales)
+library(showtext)
+library(ggtext)
+knitr::opts_chunk$set(fig.width=12, fig.height=6) 
+netflix$year_added <- as.integer(substr(
+  netflix$date_added, 
+  start = nchar(netflix$date_added) - 3,
+  stop  = nchar(netflix$date_added)
+))
+netflix <- netflix %>% filter(year_added > 2015 & year_added < 2021)
+moons <- data.frame(
+    y = 1, 
+    year = c(sort(unique(netflix$year_added)), sort(unique(netflix$year_added))),  
+    shows = 0, 
+    movies = 0
+  )
+for (i in min(netflix$year_added):max(netflix$year_added)) {
+  moons$movies[moons$year == i] <- table(netflix$type[netflix$year_added == i])[1]
+  moons$shows[moons$year == i]  <- table(netflix$type[netflix$year_added == i])[2]
+}
+moons$sum   <- moons$shows + moons$shows
+moons$ratio <- moons$shows/(moons$movies+moons$shows)
+moons$ratio[6:10] <- 1 - moons$ratio[1:5]
+moons$right <- rep(c(TRUE, FALSE), each = 5)
+moons$year_t <- c(2016, 2018, 2020.7, 2024.3, 2028.5)
+```
+
+```{r, echo=FALSE}
+font_add_google("Bebas Neue", "bebas")
+font_add_google("Open Sans", "osans", regular.wt = 300)
+font_add_google("Just Another Hand", "hand")
+showtext_auto()
+sum <- moons$sum
+theme_set(theme_void(base_size = 40, base_family = "osans"))
+ggplot(moons) +
+  geom_moon(aes(x = year_t, y = y, ratio = ratio, fill = right, right = right), size = sum/15) +
+  scale_x_continuous(breaks = c(2016, 2018, 2020.7, 2024.3, 2028.5), 
+                     labels = c("2016", "2017", "2018", "2019", "2020"), 
+                     limits = c(2016, 2030)) +
+  labs(
+    y = element_blank(),
+    x = element_blank(),
+    title = "**Netflix**",
+    subtitle = "Number of TV shows and movies added"
+  ) +
+  scale_fill_manual(values = c("#3d314a", "#fff6e0"), labels = c("movies", "TV shows")) +
+  theme(
+    axis.ticks.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.text.x = element_text(color = "white"),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.text = element_text(color = "white"),
+    plot.title = element_markdown(family = "bebas", size = 90, color = "#E50914", margin = margin(t=10, r =1, b = 5, l = 10)),
+    plot.subtitle = element_markdown(color = "white", margin = margin(l = 10)),
+    plot.background = element_rect(fill = "black",
+                                       color = "black", size = 1)
+  ) +
+  # annotations
+  annotate(
+    geom = "curve",
+    x = 2016, y = 0.996, xend = 2017, yend = 0.988,
+    color = "#ffe29a", 
+    size = 1,
+    arrow = arrow(length = unit(0.03, "npc"), type = "closed", ends = "first"),
+    curvature = 0.3,
+    lty = 2
+  ) +
+  annotate(
+    geom = "text", 
+    x = 2018.2, y = 0.988, 
+    label = "258 movies, 185 TV shows",
+    color = "#ffe29a",
+    family = "hand",
+    size = 14
+  ) +
+  annotate(
+    geom = "curve",
+    x = 2027.8, y = 1.012, xend = 2025.4, yend = 1.022,
+    color = "#ffe29a", 
+    size = 1,
+    arrow = arrow(length = unit(0.03, "npc"), type = "closed", ends = "first"),
+    curvature = 0.3,
+    lty = 2
+  ) +
+  annotate(
+    geom = "text", 
+    x = 2024.2, y = 1.022, 
+    label = "1312 movies, 697 TV shows",
+    color = "#ffe29a",
+    family = "hand",
+    size = 14
+  ) +
+  coord_cartesian(clip = "off")
+```
+
+The number of added movies and TV shows has increased over the years. For all years, Netflix added more movies than TV shows.
+
+------------------------------------------------------------------
+
+## References
+
+- **Data Set**:  
+This week's data set comes from [kaggle](https://www.kaggle.com/shivamb/netflix-shows?select=netflix_titles.csv).
+
+- `gggibbous`**-package**:  
+<https://github.com/mnbram/gggibbous>
+
+- `tidyverse`**-package**:  
+<https://www.tidyverse.org/>
+
+- `showtext`**-package**:  
+<https://github.com/yixuan/showtext>
+
+- `ggtext`**-package**:  
+<https://wilkelab.org/ggtext/>
+
+- `scales`**-package**:  
+<https://scales.r-lib.org/>
+
+--------------------------------------------------
+
+Full R code available at <https://github.com/jgranna/tidytuesday>

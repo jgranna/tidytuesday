@@ -1,0 +1,47 @@
+---
+title: "skript"
+output: html_document
+---
+
+```{r setup, include=FALSE, cache = TRUE}
+data <- tidytuesdayR::tt_load("2021-04-27")
+```
+
+## Tidy Tuesday
+
+This is my third contribution to TidyTuesday, which is 'a weekly podcast and community activity brought to you by the R4DS Online Learning Community'. Their goal is to help R learners learn in real-world contexts. 
+
+For more information, visit the [TidyTuesday homepage](https://www.tidytuesday.com/), check out their [GitHub repository](https://github.com/rfordatascience/tidytuesday) and follow the [R4DS Learning Community on Twitter](https://twitter.com/R4DScommunity).
+
+The purpose of these posts is mainly for exercising purposes. Thus, the provided graphs are not necessarily designed to provide the greatest possible insights. However, I always provide the R code for interested people at the page bottom.
+
+```{r, include=FALSE}
+library(tidyverse)
+library(showtext)
+library(ggtext)
+library(stringr)
+library(genderizeR)
+library(gender)
+knitr::opts_chunk$set(fig.width=12, fig.height=6) 
+ceos <- data$departures
+# use only first word to extract first names
+ceos$fnames <- word(string = ceos$exec_fullname, start = 1, end = 1, sep = fixed(" "))
+# for some, first word is abbrev.; take the second word as first name
+ceos$fnames[nchar(ceos$fnames) == 2] <- word(string = ceos$exec_fullname[nchar(ceos$fnames) == 2], start = 2, end = 2, sep = fixed(" "))
+# sort out CEOs with more than one abbrev first name
+ceos <- ceos[nchar(ceos$fnames) > 2, ]
+gender1 <- gender(ceos$fnames[1:1000], method = "genderize")
+gender2 <- gender(ceos$fnames[1001:2000], method = "genderize")
+gender3 <- gender(ceos$fnames[2001:3000], method = "genderize")
+gender4 <- gender(ceos$fnames[3001:4000], method = "genderize")
+gender5 <- gender(ceos$fnames[4001:5000], method = "genderize")
+```
+
+## References 
+
+- `genderizeR`**-package** :  
+Wais K (2006). "Gender Prediction Methods Based on First Names with genderizeR." _The R Journal_, *8*(1), 17-37. doi: [10.32614/RJ-2016-002](http://doi.org/10.32614/RJ-2016-002)
+
+--------------------------------------------------
+
+Full R code available at <https://github.com/jgranna/tidytuesday>

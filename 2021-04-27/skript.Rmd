@@ -61,7 +61,7 @@ frame <- frame %>%
 
 ## This week's data
 
-This week's data concerns CEO departures from S&P 1500 firms between 1991 and 2019. Among other variables, the data contains the corresponding company names, the year of the departure, and the full name of the departed CEO.
+This week's data concerns CEO departures from S&P 1500 firms between 1991 and 2019 by [Gentry et al. 2021](https://onlinelibrary.wiley.com/doi/full/10.1002/smj.3278) via [DatalsPlural](https://www.data-is-plural.com/archive/2021-04-21-edition/). Among other variables, the data contains the corresponding company names, the year of the departure, and the full name of the departed CEO.
 
 ## Diversity in the data
 
@@ -200,6 +200,8 @@ Thus, one would need more sophisticated measures to track the evolution of diver
 
 ## References 
 
+- Richard J. Gentry, Joseph S. Harrison, Timothy J. Quigley, Steven Boivie, 2021. A database of CEO turnover and dismissal in S&P 1500 firms. 2000–2018, https://doi.org/10.1002/smj.3278.
+
 - `ggbump`**-package**:  
 <https://github.com/davidsjoberg/ggbump>
 
@@ -223,4 +225,4 @@ Thus, one would need more sophisticated measures to track the evolution of diver
 
 --------------------------------------------------
 
-Full R code available at <https://github.com/jgranna/tidytuesday>
+Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/main/2021-04-27).

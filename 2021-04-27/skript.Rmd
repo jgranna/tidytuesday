@@ -1,5 +1,5 @@
 ---
-title: "skript"
+title: "CEO Departures"
 output: html_document
 ---
 
@@ -9,7 +9,7 @@ data <- tidytuesdayR::tt_load("2021-04-27")
 
 ## Tidy Tuesday
 
-This is my third contribution to TidyTuesday, which is 'a weekly podcast and community activity brought to you by the R4DS Online Learning Community'. Their goal is to help R learners learn in real-world contexts. 
+This is my fourth contribution to TidyTuesday, which is 'a weekly podcast and community activity brought to you by the R4DS Online Learning Community'. Their goal is to help R learners learn in real-world contexts. 
 
 For more information, visit the [TidyTuesday homepage](https://www.tidytuesday.com/), check out their [GitHub repository](https://github.com/rfordatascience/tidytuesday) and follow the [R4DS Learning Community on Twitter](https://twitter.com/R4DScommunity).
 
@@ -20,27 +20,206 @@ library(tidyverse)
 library(showtext)
 library(ggtext)
 library(stringr)
-library(genderizeR)
-library(gender)
+library(ggbump)
+library(pacman)
+library(ineq)
+library(pbapply)
+pacman::p_load(padr, hablar, jsonlite, 
+               httr, xml2, lubridate)
 knitr::opts_chunk$set(fig.width=12, fig.height=6) 
 ceos <- data$departures
 # use only first word to extract first names
-ceos$fnames <- word(string = ceos$exec_fullname, start = 1, end = 1, sep = fixed(" "))
+ceos$fnames<- word(string = ceos$exec_fullname, start = 1, end = 1, sep = fixed(" "))
 # for some, first word is abbrev.; take the second word as first name
 ceos$fnames[nchar(ceos$fnames) == 2] <- word(string = ceos$exec_fullname[nchar(ceos$fnames) == 2], start = 2, end = 2, sep = fixed(" "))
 # sort out CEOs with more than one abbrev first name
-ceos <- ceos[nchar(ceos$fnames) > 2, ]
-gender1 <- gender(ceos$fnames[1:1000], method = "genderize")
-gender2 <- gender(ceos$fnames[1001:2000], method = "genderize")
-gender3 <- gender(ceos$fnames[2001:3000], method = "genderize")
-gender4 <- gender(ceos$fnames[3001:4000], method = "genderize")
-gender5 <- gender(ceos$fnames[4001:5000], method = "genderize")
+ceos <- aceos <- ceos[nchar(ceos$fnames) > 2, ]
+aceos <- ceos
+# take only years from 2010 to 2019
+ceos <- ceos %>% filter(fyear > 2009 & fyear < 2020)
+# take top 10 names
+top_names <- names(tail(sort(table(ceos$fnames)), n = 7))
+# count number of top names
+count <- rep(NA, length(2010:2019))
+for(i in seq(2010, 2019)) {
+  count[i - 2009] <- nrow(ceos %>% 
+                            filter(fnames %in% top_names) %>%   
+                            filter(fyear <= i))
+}
+ceos$tnames <- ceos$fnames %in% top_names
+frame <- data.frame(year = rep(2010:2019, each = length(top_names)), name = rep(top_names, length(2010:2019)), freq = NA)
+for(i in 1:nrow(frame)) {
+  frame$freq[i] <- length(ceos$fnames[ceos$fnames == frame$name[i] &
+                                     ceos$fyear <= frame$year[i]])
+}
+frame <- frame %>%
+  group_by(year) %>%
+  mutate(rank = rank(-freq, ties.method = "random"))
+#total <- table(ceos$fyear)
+#frame <- data.frame(total = total, tnames = count)
 ```
+
+## This week's data
+
+This week's data concerns CEO departures from S&P 1500 firms between 1991 and 2019. Among other variables, the data contains the corresponding company names, the year of the departure, and the full name of the departed CEO.
+
+## Diversity in the data
+
+There are several possibilities to track diversity in the CEOs of S&P 1500 firms. Again, the aim of this post is not to provide scientifically valid analyses, but rather to show the possibilities of `ggplot` and other available R packages and give a short (descriptive) overview over the data.  
+
+The first thing that struck me when looking at the data was that the top 7 occuring first names of departed CEOs account for close to 30% of the CEOs:
+
+```{r}
+length(aceos$fnames[aceos$fnames %in% top_names]) / nrow(aceos)
+top_names
+```
+This of course is a strong indicator that the whole spectrum of departed CEOs is not really diverse. Moreover, all names are male (when regarded on a state-imposed binary gender scale) and are likely to be not associated with people belonging to minorities. As one could expect, the departed CEOs do not represent the spectrum of different ethnicities (and genders) of the society.
+
+To emphasize the importance of just a few names for the group of S&P 1500 (departed) CEOs, I decided to make a graph using `ggbump` indicating a "race" between the 5 most occuring names. The following graph thereby regards the cumulated number of names starting from 2010. I chose 2010 to 2019 as a time window simply for visualization reasons, which is also the case for the number of regarded names:
+
+```{r, echo=FALSE}
+frame <- frame %>% filter(rank <=5)
+font_add_google("Open Sans", "osans")
+theme_set(theme_minimal(base_size = 30, base_family = "osans"))
+showtext_auto()
+ggplot(frame, aes(x = year, y = rank, color = name)) +
+  # make bump plot
+  geom_bump(size = 2) + 
+  # add points
+  geom_point(size = 5) +
+  # add labels at the end of the plot
+  geom_text(
+    data = frame %>% filter(year == 2019),
+    aes(label = name),
+    hjust = 0,
+    nudge_x = 0.3,
+    size = 12
+  ) +
+    # add labels at the beginning of the plot
+  geom_text(
+    data = frame %>% filter(year == 2010),
+    aes(label = name),
+    hjust = 1,
+    nudge_x = -0.3,
+    size = 12
+  ) +
+  # labels / themes etc
+  labs(
+    #x = element_blank(),
+    y = "**rank**",
+    title = "**John's Race to the Top**",
+    subtitle = "Top names of departed CEOs between 2010 and 2019 from S&P 1500 firms",
+    caption = "Source: Gentry et al. 2021 | Visualization: @jugRanna"
+  ) +
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_markdown(color = "white", size = 30),
+    axis.text.x = element_markdown(size = 30, face = "bold"),
+    axis.title.x = element_markdown(),
+    legend.title = element_blank(),
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    plot.caption = element_markdown(color = "gray70"),
+    plot.caption.position = "plot",
+    plot.title = element_markdown(color = "white", size = 50),
+    plot.title.position = "plot",
+    legend.position = "none",
+    plot.subtitle = element_markdown(color = "white"),
+    plot.background = element_rect(fill = "black",
+                                   color = "black", size = 1)
+  ) +
+  scale_x_continuous(
+    limits = c(2009.3, 2020),
+    breaks = frame$year %>% unique(),
+    labels = as.character(2010:2019)
+  ) +
+  colorspace::scale_color_discrete_qualitative(palette = "Set 2") +
+  scale_y_reverse()
+```
+
+### Evolution of diversity over time
+
+When starting my analysis, I was also interested in not only how diverse the departed CEOs are over the complete time horizon, but also whether the diversity at least increases over time.  
+
+An economic approach to measure unequal (i. e. undiverse) allocations in general is to assess the Gini coefficient. The Gini coefficient is standardized to have values between 0 and 1, where 0 refers to perfect equality in the allocation (i. e. each name occuring in exactly the same frequency) and 1 refers to only a single first name accounting for all departed CEOs. 
+
+Although it is obvious that this methodology is flawed in this context, I hoped to maybe gain some interesting insights by simply tracking the Gini coefficient over time:
+
+```{r, echo=FALSE}
+nfreqs <- pblapply(1996:2019, function(x) (sort(table(aceos$fnames[aceos$fyear == x]))))
+gini.vec <- sapply(1:length(1996:2019), function(x) ineq(nfreqs[[x]], type = "Gini"))
+font_add_google("Open Sans", "osans")
+data <- data.frame(time = 1996:2019, gini = gini.vec)
+theme_set(theme_minimal(base_size = 30, base_family = "osans"))
+showtext_auto()
+ggplot(data = data, aes(x = time, y = gini)) +
+  geom_line() +
+  xlim(c(1995, 2021)) +
+  labs(
+    title = "**Diversity in S&P 1500 firms departures**",
+    subtitle = "Curve gives the Gini index for the first names of departed CEOs.  
+*Gini index = 0* refers to every name occuring equally often;   
+*Gini index = 1* refers to a single name accounting for all departures",
+    x = "**Year**",
+    y = "**Gini Index**"
+  ) + 
+  theme(
+    plot.title = element_markdown(size = 45),
+    plot.subtitle = element_markdown(),
+    plot.title.position = "plot",
+    axis.title.x = element_markdown(),
+    axis.title.y = element_markdown()
+  )
+```
+
+But it turns out that the index is instead driven by the total number of names of departed CEOs:
+
+```{r, echo=FALSE}
+uniques <- rep(NA, length(1996:2019))
+for(i in 1996:2019) uniques[i - 1995] <- length(unique(aceos$fnames[aceos$fyear == i]))
+data <- data.frame(year = 1996:2019, uniques = uniques)
+ggplot(data, aes(x = year, y = uniques)) +
+  geom_line() +
+  xlim(c(1995, 2021)) +
+  labs(
+    title = "**Total number of names**",
+    subtitle = "Between 1996 and 2019",
+    x = "**Year**",
+    y = "**Number of names**"
+  ) + 
+  theme(
+    plot.title = element_markdown(),
+    plot.subtitle = element_markdown(),
+    plot.title.position = "plot",
+    axis.title.x = element_markdown(),
+    axis.title.y = element_markdown()
+  )
+```
+
+Thus, one would need more sophisticated measures to track the evolution of diversity in the S&P 1500. I believe that there would be room for improvement regarding the use of the Gini coefficient, but I choose to discontinue my analysis at this point due to time constrainment.
 
 ## References 
 
-- `genderizeR`**-package** :  
-Wais K (2006). "Gender Prediction Methods Based on First Names with genderizeR." _The R Journal_, *8*(1), 17-37. doi: [10.32614/RJ-2016-002](http://doi.org/10.32614/RJ-2016-002)
+- `ggbump`**-package**:  
+<https://github.com/davidsjoberg/ggbump>
+
+- `ggtext`**-package**:  
+<https://wilkelab.org/ggtext/>
+
+- `ineq`**-package**:  
+<https://cran.r-project.org/package=ineq>
+
+- `pbapply`**-package**:  
+<https://github.com/psolymos/pbapply>
+
+- `showtext`**-package**:  
+<https://github.com/yixuan/showtext>
+
+- `stringr`**-package**:  
+<https://stringr.tidyverse.org/>
+
+- `tidyverse`**-package**:  
+<https://www.tidyverse.org/>
 
 --------------------------------------------------
 

@@ -3,6 +3,7 @@ title: "Water Sources"
 output: html_document
 ---
 
+
 ```{r setup, include=FALSE, cache = TRUE}
 data <- tidytuesdayR::tt_load("2021-05-04")
 ```
@@ -65,7 +66,8 @@ g1 <- ggplot(africa) +
   labs(
     title = "**Water sources in Africa**",
     subtitle = "Scatter plot of working and not working water sources",
-    color = "functional"
+    color = "functional",
+    caption = "**Data:** WPDX | **Visualization:** @jugRanna"
   ) +
   theme(
     panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.5), 
@@ -74,12 +76,13 @@ g1 <- ggplot(africa) +
     plot.title = element_markdown(size = 43),
     axis.title.x = element_blank(),
     axis.title.y = element_blank(),
-    legend.title = element_markdown(face = "bold")
+    legend.title = element_markdown(face = "bold"),
+    plot.caption = element_markdown(color = "gray70")
   ) +
    annotation_north_arrow(
      location = "bl", 
      which_north = "true", 
-     pad_x = unit(0.5, "in"), 
+     pad_x = unit(0.72, "in"), 
      pad_y = unit(0.2, "in"), 
      style = north_arrow_fancy_orienteering
   ) +
@@ -182,15 +185,17 @@ g1
 
 ### Type and Status of Water sources
 
-Further interesting insights yields a bar plot of the types of water sources and an indicator of their functionality:
+Further interesting insights yields a bar plot of the types of water sources and an indicator of functionality:
 
-```{r, echo=FALSE}
+```{r, include=FALSE}
 water <- water %>% drop_na(water_source) %>%
   select(water_source, status_id)
 water_source <- water %>%
   group_by(water_source, status_id) %>%
   summarise(count = n())
+```
 
+```{r, echo=FALSE}
 ggplot(data = water_source, aes(x = reorder(water_source, count), y = count, fill = status_id)) +
   geom_bar(stat = "identity") + 
   coord_flip() +
@@ -199,7 +204,8 @@ ggplot(data = water_source, aes(x = reorder(water_source, count), y = count, fil
     subtitle = "And the corresponding functionality",
     x = "number of water sources",
     y = "type of water source",
-    fill = "functionality"
+    fill = "functionality",
+    caption = "**Data:** WPDX | **Visualization:** @jugRanna"
   ) + 
   theme(
     plot.title = element_text(face = "bold", size = 43),
@@ -207,7 +213,8 @@ ggplot(data = water_source, aes(x = reorder(water_source, count), y = count, fil
     axis.title.x = element_text(face = "bold"),
     axis.title.y = element_text(face = "bold"),
     plot.title.position = "plot",
-    legend.position = "bottom"
+    legend.position = "bottom",
+    plot.caption = element_markdown(color = "gray70")
   )
 ```
 

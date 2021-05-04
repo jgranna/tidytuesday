@@ -1,0 +1,244 @@
+---
+title: "Water Sources"
+output: html_document
+---
+
+```{r setup, include=FALSE, cache = TRUE}
+data <- tidytuesdayR::tt_load("2021-05-04")
+```
+
+## Tidy Tuesday
+
+This is my fourth contribution to TidyTuesday, which is 'a weekly podcast and community activity brought to you by the R4DS Online Learning Community'. Their goal is to help R learners learn in real-world contexts. 
+
+For more information, visit the [TidyTuesday homepage](https://www.tidytuesday.com/), check out their [GitHub repository](https://github.com/rfordatascience/tidytuesday) and follow the [R4DS Learning Community on Twitter](https://twitter.com/R4DScommunity).
+
+The purpose of these posts is mainly for exercising purposes. Thus, the provided graphs are not necessarily designed to provide the greatest possible insights. However, I always provide the R code for interested people at the page bottom.
+
+```{r, include=FALSE}
+library(data.table)
+library(tidyverse)
+library(showtext)
+library(ggtext)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(ggspatial)
+library(sf)
+knitr::opts_chunk$set(fig.width=12, fig.height=6) 
+
+water <- data$water
+water <- data.table(water)
+```
+
+## Water Sources
+
+This week's data comes from [Water Point Data Exchange](https://data.waterpointdata.org/dataset/Water-Point-Data-Exchange-WPDx-Basic-/jfkt-jmqa). It is a smaller sub-dataset from the original data to include mainly African data. 
+
+> Using this data and advanced GIS and machine learning analysis, several decision support tools were built. Designed in partnership with governments and data scientists, these tools provide concrete insights, like which water point to send a technician to rehabilitate next to reach the most people.
+>
+> -- <cite>Katy Sill, Adam Kariv</cite>
+
+### Scatterplot of the data
+
+A scatterplot of the data shows the locational distribution of the observations. Arrows indicate countries with a relatively high water source density.
+
+```{r, include=FALSE}
+africa <- ne_countries(scale = "medium", returnclass = "sf", continent = "Africa")
+# convert lon and lat to points; filter out observations that are in Africa
+points <- st_as_sf(water, coords = c("lon_deg", "lat_deg"), crs = 4326)
+water$ii <- !is.na(as.numeric(st_intersects(points$geometry, africa)))
+water$status_id <- factor(water$status_id, levels = c("n", "y"), labels = c("no", "yes"))
+water <- water %>% filter(ii == TRUE) %>% filter(status_id != "u")
+```
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+font_add_google("Open Sans", "osans")
+showtext_auto()
+theme_set(theme_minimal(base_size = 30, base_family = "osans"))
+g1 <- ggplot(africa) +
+  geom_sf(fill = "white") + 
+  geom_point(
+    data = water, 
+    mapping = aes(x = lon_deg, y = lat_deg, color = status_id),
+    size = 0.01,
+    alpha = 0.02
+  ) +
+  labs(
+    title = "**Water sources in Africa**",
+    subtitle = "Scatter plot of working and not working water sources",
+    color = "functional"
+  ) +
+  theme(
+    panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.5), 
+    panel.background = element_rect(fill = "aliceblue"),
+    plot.title.position = "plot",
+    plot.title = element_markdown(size = 43),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    legend.title = element_markdown(face = "bold")
+  ) +
+   annotation_north_arrow(
+     location = "bl", 
+     which_north = "true", 
+     pad_x = unit(0.5, "in"), 
+     pad_y = unit(0.2, "in"), 
+     style = north_arrow_fancy_orienteering
+  ) +
+  annotation_scale(
+    location = "bl", 
+    width_hint = 0.3,
+    text_cex = 2
+  ) +
+  coord_sf(xlim = c(-15, 50), ylim = c(-25, 15)) +
+  guides(
+    color = guide_legend(override.aes = list(size = 4, alpha = 1))
+  ) +
+  annotate(
+    geom = "curve",
+    x = 5, y = 4, xend = 5, yend = -5,
+    color = "black", 
+    size = .7,
+    arrow = arrow(length = unit(0.03, "npc"), type = "closed", ends = "first"),
+    curvature = 0.3,
+    lty = 2
+  ) +
+  annotate(
+    geom = "text", 
+    x = 5, y = -5.3, 
+    label = "Nigeria",
+    color = "black",
+    family = "osans",
+    size = 9
+  ) +
+  annotate(
+    geom = "curve",
+    x = 0, y = 4, xend = 0, yend = -10,
+    color = "black", 
+    size = .7,
+    arrow = arrow(length = unit(0.03, "npc"), type = "closed", ends = "first"),
+    curvature = 0.1,
+    lty = 2
+  ) +
+  annotate(
+    geom = "text", 
+    x = 0, y = -10, 
+    label = "Ghana",
+    color = "black",
+    family = "osans",
+    size = 9
+  ) +
+  annotate(
+    geom = "curve",
+    x = -10, y = 3, xend = -10, yend = -2.7,
+    color = "black", 
+    size = .7,
+    arrow = arrow(length = unit(0.03, "npc"), type = "closed", ends = "first"),
+    curvature = -0.1,
+    lty = 2
+  ) +
+  annotate(
+    geom = "text", 
+    x = -10, y = -3, 
+    label = "Liberia",
+    color = "black",
+    family = "osans",
+    size = 9
+  ) +
+  annotate(
+    geom = "curve",
+    x = 33, y = -22, xend = 39, yend = -22,
+    color = "black", 
+    size = .7,
+    arrow = arrow(length = unit(0.03, "npc"), type = "closed", ends = "first"),
+    curvature = 0.2,
+    lty = 2
+  ) +
+  annotate(
+    geom = "text", 
+    x = 43, y = -22, 
+    label = "Simbabwe",
+    color = "black",
+    family = "osans",
+    size = 9
+  ) +
+  annotate(
+    geom = "curve",
+    x = 35, y = 0, xend = 42, yend = -3,
+    color = "black", 
+    size = .7,
+    arrow = arrow(length = unit(0.03, "npc"), type = "closed", ends = "first"),
+    curvature = 0.2,
+    lty = 2
+  ) +
+  annotate(
+    geom = "text", 
+    x = 45, y = -3, 
+    label = "Uganda",
+    color = "black",
+    family = "osans",
+    size = 9
+  )
+g1
+```
+
+### Type and Status of Water sources
+
+Further interesting insights yields a bar plot of the types of water sources and an indicator of their functionality:
+
+```{r, echo=FALSE}
+water <- water %>% drop_na(water_source) %>%
+  select(water_source, status_id)
+water_source <- water %>%
+  group_by(water_source, status_id) %>%
+  summarise(count = n())
+
+ggplot(data = water_source, aes(x = reorder(water_source, count), y = count, fill = status_id)) +
+  geom_bar(stat = "identity") + 
+  coord_flip() +
+  labs(
+    title = "Count of Water Sources in Africa",
+    subtitle = "And the corresponding functionality",
+    x = "number of water sources",
+    y = "type of water source",
+    fill = "functionality"
+  ) + 
+  theme(
+    plot.title = element_text(face = "bold", size = 43),
+    legend.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    plot.title.position = "plot",
+    legend.position = "bottom"
+  )
+```
+
+Boreholes are by far the most important source of water in the regarded countries. There is however a relatively large fraction of malfunctioning water sources as can be seen in the plot. 
+
+## References
+
+- `ggtext`**-package**:  
+<https://wilkelab.org/ggtext/>
+
+- `showtext`**-package**:  
+<https://github.com/yixuan/showtext>
+
+- `tidyverse`**-package**:  
+<https://www.tidyverse.org/>
+
+- `rnaturalearth`**-package**:  
+<https://docs.ropensci.org/rnaturalearth/>
+
+- `rnaturalearthdata`**-package**:  
+<https://docs.ropensci.org/rnaturalearthdata/>
+
+- `ggspatial`**-package**:  
+<https://paleolimbot.github.io/ggspatial/>
+
+- `sf`**-package**:  
+<https://r-spatial.github.io/sf/>
+
+- `data.table`**-package**:  
+<https://rdatatable.gitlab.io/data.table/>
+
+--------------------------------------------------
+
+Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/main/2021-05-04).

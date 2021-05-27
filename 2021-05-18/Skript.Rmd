@@ -81,6 +81,29 @@ g1
 - `tidyverse`**-package**:  
 <https://www.tidyverse.org/>
 
+```{r, include=FALSE, eval=FALSE}
+theme_set(theme_minimal(base_size = 13, base_family = "osans"))
+g1 <- ggplot(managers, aes(x = years_of_experience_in_field, y = annual_salary)) +
+  geom_violin(fill = "white") +
+  geom_sina(alpha = 0.1)  +
+  labs(
+    title = "**Manager Annual Salaries versus Experience**",
+    subtitle = "Violin plot of bivariate relationship",
+    caption = "**Data:** Ask a Manager Survey | **Visualization:** @jugRanna",
+    x = "**relevant experience** (in years)",
+    y = "**annual salary** (USD)"
+  ) +
+  theme(
+    plot.title.position = "plot",
+    plot.title = element_markdown(size = 19),
+    axis.title.x = element_markdown(),
+    axis.title.y = element_markdown(),
+    plot.caption = element_markdown(color = "gray70")
+  ) 
+png("/home/julian/Desktop/twitter_export.png", width = 950)
+  g1
+dev.off()
+```
 
 --------------------------------------------------
 

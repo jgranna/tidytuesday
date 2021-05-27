@@ -1,0 +1,130 @@
+---
+title: "Super Mario"
+output: html_document
+---
+
+
+```{r setup, include=FALSE, cache = TRUE}
+data <- tidytuesdayR::tt_load("2021-05-25")
+```
+
+## Tidy Tuesday
+
+This is my sixth contribution to TidyTuesday, which is 'a weekly podcast and community activity brought to you by the R4DS Online Learning Community'. Their goal is to help R learners learn in real-world contexts. 
+
+For more information, visit the [TidyTuesday homepage](https://www.tidytuesday.com/), check out their [GitHub repository](https://github.com/rfordatascience/tidytuesday) and follow the [R4DS Learning Community on Twitter](https://twitter.com/R4DScommunity).
+
+The purpose of these posts is mainly for exercising purposes. Thus, the provided graphs are not necessarily designed to provide the greatest possible insights. However, I always provide the R code for interested people at the page bottom.
+
+```{r, include=FALSE}
+library(tidyverse)
+library(showtext)
+library(ggtext)
+library(Rokemon)
+library(patchwork)
+library(png)
+Rokemon::import_pokefont()
+knitr::opts_chunk$set(fig.width=12, fig.height=6) 
+
+records <- data$records
+drivers <- data$drivers
+```
+
+## Super Mario
+
+This week's data comes from [Mario Kart World Records](https://mkwrs.com/). It contains world records for the corresponding racing game for the Nintendo 64 gaming console. 
+
+### Scatterplot of the data
+
+A scatterplot of the data shows the locational distribution of the observations. Arrows indicate countries with a relatively high water source density.
+
+```{r, include=FALSE}
+# filter time w/o shortcuts
+records <- records %>%
+  filter(shortcut == "No") %>%
+  filter(system_played == "PAL") %>%
+  filter(type == "Three Lap") %>%
+  filter(track != "Sherbet Land" & track != "Mario Raceway" & track != "Toad's Turnpike" &
+           track != "Moo Moo Farm" & track != "Kalimari Desert" & track != "Bowser's Castle" & 
+           track != "Rainbow Road" & track != "Choco Mountain" & track != "Yoshi Valley")
+# get minimum time for each track
+mins <- aggregate(records$time ~ records$track, FUN = min)
+names(mins) <- c("track", "time")
+# divide time by minimum time
+tracks <- unique(records$track)
+for (i in 1:length(unique(records$track))) {
+  records$time[records$track == tracks[i]] <- 
+    records$time[records$track == tracks[i]] / mins$time[mins$track == tracks[i]]
+}
+```
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(records, aes(x = date, y = time, color = track)) +
+  geom_line()
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+records <- data$records
+records <- records %>%
+  filter(shortcut == "No") %>%
+  filter(system_played == "PAL") %>%
+  filter(type == "Three Lap") %>%
+  mutate(image = "_images/cut.png")
+# get minimum time for each track
+mins <- aggregate(records$time ~ records$track, FUN = min)
+names(mins) <- c("track", "time")
+# divide time by minimum time
+tracks <- unique(records$track)
+for (i in 1:length(unique(records$track))) {
+  records$time[records$track == tracks[i]] <- 
+    records$time[records$track == tracks[i]] / mins$time[mins$track == tracks[i]]
+}
+font_add_google(name = 'Press Start 2P', family = 'Press_Start_2P')
+showtext_auto()
+
+image <- readPNG("_images/cut_y.png", native = TRUE)
+ggplot(records, aes(x = date, y = time)) +
+  geom_line() +
+  facet_wrap(~ track) + 
+  theme_gba() +
+  labs(
+    title = 'Mario Kart Record Times Convergence', 
+    subtitle = 'Index = 1 indicates best track time', 
+    caption = 'Data: Mario Kart World Records | Visualization: @jugRanna'
+  )+
+  theme(
+    axis.text.x = element_text(angle = 45, vjust = 0.4),
+    text = element_text(family = 'Press_Start_2P', size = 9),
+    plot.title = element_text(family = 'Press_Start_2P', size = 12, colour = 'blue'),
+    plot.subtitle = element_text(family = 'Press_Start_2P', size = 10, colour = 'blue'),
+    panel.background = element_rect(fill = NA),
+    plot.background = element_rect(fill = "#FFF418",
+                                   color = "#FFF418", size = 2)
+  ) +
+  inset_element(p = image,
+                left = 0.94,
+                bottom = 0.92,
+                right = 1.0,
+                top = 1, align_to = "full")
+ggsave("twitter.png", width = 12, height = 9, dpi = "screen")
+```
+
+## References
+
+- `ggtext`**-package**:  
+<https://wilkelab.org/ggtext/>
+
+- `patchwork`**-package**:  
+<https://patchwork.data-imaginist.com/articles/patchwork.html>
+
+- `Rokemon`**-package**:  
+<https://github.com/schochastics/rokemon>
+
+- `showtext`**-package**:  
+<https://github.com/yixuan/showtext>
+
+- `tidyverse`**-package**:  
+<https://www.tidyverse.org/>
+
+--------------------------------------------------
+
+Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/main/2021-05-25).

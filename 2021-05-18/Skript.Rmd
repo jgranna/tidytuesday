@@ -30,9 +30,9 @@ managers <- data$survey
 
 This week's data comes from [Ask a Manager Survey](https://docs.google.com/spreadsheets/d/1IPS5dBSGtwYVbjsfbaMCYIWnOuRmJcbequohNxCyGVw/edit?resourcekey#gid=1625408792). 
 
-### Scatterplot of the data
+### Influence of Experience on annual salary
 
-A scatterplot of the data shows the locational distribution of the observations. Arrows indicate countries with a relatively high water source density.
+One could expect that the more experience a manager has in the relevant field, the higher her salary will be. I thus provide a bivariate descriptive plot to gain some first insights. To see the distribution in each class in more detail, I provide violin plots.
 
 ```{r, include=FALSE}
 # filter out 5% highest and lowest salaries
@@ -67,6 +67,8 @@ g1 <- ggplot(managers, aes(x = years_of_experience_in_field, y = annual_salary))
 g1
 ```
 
+In general, as expected, years of experience seems to be positively associated with annual salaries of managers.
+
 ## References
 
 - `ggtext`**-package**:  
@@ -82,6 +84,7 @@ g1
 <https://www.tidyverse.org/>
 
 ```{r, include=FALSE, eval=FALSE}
+# for exporting to twitter
 theme_set(theme_minimal(base_size = 13, base_family = "osans"))
 g1 <- ggplot(managers, aes(x = years_of_experience_in_field, y = annual_salary)) +
   geom_violin(fill = "white") +
@@ -100,11 +103,11 @@ g1 <- ggplot(managers, aes(x = years_of_experience_in_field, y = annual_salary))
     axis.title.y = element_markdown(),
     plot.caption = element_markdown(color = "gray70")
   ) 
-png("/home/julian/Desktop/twitter_export.png", width = 950)
-  g1
-dev.off()
+#png("/home/julian/Desktop/twitter_export.png", width = 950)
+#  g1
+#dev.off()
 ```
 
 --------------------------------------------------
 
-Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/main/2021-05-04).
+Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/main/2021-05-18).

@@ -21,7 +21,6 @@ The purpose of these posts is mainly for exercising purposes. Thus, the provided
 library(tidyverse)
 library(showtext)
 library(ggtext)
-library(png)
 knitr::opts_chunk$set(fig.width=8, fig.height=5) 
 
 fishing <- data$fishing
@@ -118,7 +117,7 @@ ggplot(sumfish, aes(x = year, y = value)) +
     size = 6
   ) +
   coord_cartesian(clip = "off")
-ggsave(filename = "~/Desktop/twitter.png")
+#ggsave(filename = "~/Desktop/twitter.png")
 ```
 
 It is apparent that the amount of King Salmon has decreased substantially over the years while the weight of caught Yellow Perch has increased, especially during the Quagga mussle population peak between 1998 and 2002. While the decrease in Chinook Salmon is generally considered to be (in large extent) by the large mussle population, it is of course questionable, whether it has led to increasing number of Yellow Perch. This would need much further investigation, but I nonetheless find it an interesting trend.
@@ -133,12 +132,6 @@ Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/ma
 
 - `ggtext`**-package**:  
 <https://wilkelab.org/ggtext/>
-
-- `patchwork`**-package**:  
-<https://patchwork.data-imaginist.com/articles/patchwork.html>
-
-- `Rokemon`**-package**:  
-<https://github.com/schochastics/rokemon>
 
 - `showtext`**-package**:  
 <https://github.com/yixuan/showtext>

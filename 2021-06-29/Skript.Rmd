@@ -1,0 +1,156 @@
+---
+title: "Canadian Heatwave"
+output: html_document
+bibliography: bibliography.bib
+---
+
+
+```{r setup, include=FALSE, cache = TRUE}
+library(tidyverse)
+library(showtext)
+library(ggtext)
+library(colorspace)
+## data
+## via https://projects.oregonlive.com/weather/temps/
+df <- 
+  readr::read_csv("https://projects.oregonlive.com/weather/pdx_temps.csv") %>% 
+  mutate(yday = lubridate::yday(date),
+         year = lubridate::year(date),
+         years = year %/% 20 * 20,
+         decade = year %/% 10 * 10,
+         decade = if_else(decade == 2020, "2020–2021", paste0(decade, "–", decade + 9)),
+         years = if_else(years == 2020, "2020–2021", paste0(years, "–", years + 19)),
+         new_record = if_else(tmax > 100 & year == 2021, "Hottest 3 Days ever", ""), #New heat records in 2021
+         desc = "June 26 - June 28 were the hottest three days ever recorded in Portland.")
+
+months <- tibble(yday = c(1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335),
+                 label = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", " ", "Sep", "Oct", "Nov", "Dec"))
+```
+
+Regarding the exceptional heatwave in Canada in June 2021, I decided to pause TidyTuesday for a week and instead visualize minimum and maximum temperatures in Portland between 1938 and 2021. This work is inspired by a post by the [New York Times](https://twitter.com/DrShepherd2013/status/1409911531052146690/photo/1) and a tweet by [Cedric Scherer](https://twitter.com/CedScherer/status/1410180270930731009/photo/1).
+
+```{r, include=FALSE}
+library(tidyverse)
+library(showtext)
+library(ggtext)
+library(colorspace)
+knitr::opts_chunk$set(fig.width=8, fig.height=5) 
+```
+
+## Scatter Plot of Maximum Temperatures in Portland, Canada
+
+June 26-28, 2021, were the hottest days ever recorded in Portland, Canada, reaching a maximum of 116 degrees Fahrenheit (roughly 46.7 degrees Celsius). To show how unusually hot these days are in the last roughly 80 years, I provide a scatter plot, where the outlier temperatures are easily identifyable. I choose a plot on a polar axis and to indicate possible time trends, I color the points corresponding to their respective 20-year period. I also color the main y-grid lines for slightly improved interpretability.
+
+```{r, echo = FALSE, warning=FALSE}
+font_add_google("Roboto Condensed", "osans")
+showtext_auto()
+theme_set(theme_void(base_family = "osans"))
+pal1 <- sequential_hcl(5, palette = "Red-Blue", rev = T)
+theme_update(
+  plot.caption = element_markdown(size = 10, color = "gray60", margin = margin(0, 0, 3, 0)),
+  plot.caption.position = "plot",
+  legend.text = element_text(size = 20),
+  legend.position = "bottom",
+  legend.title = element_text(face = "bold", hjust = 0.5, margin = margin(0,0,3,0), size = 20),
+  axis.title.y = element_text(angle = 90, margin = margin(-50,5,20,5), hjust = 0.83, size = 20),
+  axis.ticks.y = element_line(color = "gray20", size = 1.5),
+  axis.line.x = element_blank(),
+  plot.title = element_markdown(size = 30),
+  plot.title.position = "plot",
+  plot.subtitle = element_text(size = 22),
+  axis.text.x = element_text(size = 20, color = 1),
+  axis.text.y = element_text(size = 20, color = pal1, angle = 0, margin = margin(0,3,0,0)),
+  axis.ticks.x = element_line(color = "grey20", size = 20),
+  panel.grid.major.y = element_line(color = c(pal1, "#FFFFFF"), linetype = 1),
+  panel.grid.major.x = element_line(color = "grey70", linetype = 3)
+)
+```
+```{r, warning=FALSE}
+p <- df %>%
+  ggplot(aes(x = yday, y = tmax)) +
+  geom_point(aes(color = years), alpha = 0.4, size = 0.4) +
+  scale_color_discrete_sequential(palette = "Plasma") +
+  scale_x_continuous(breaks = months$yday, labels = months$label, expand = c(.001, .001)) + 
+  scale_y_continuous(breaks = c(30, 50, 70, 90, 110), labels = c('30', '50', '70', '90', '110'), expand = c(.001, .001)) + 
+  coord_polar() +
+  labs(
+    y = expression(paste("daily temperature (", degree ~ F, ")"))
+  ) +
+  guides(
+    color = guide_legend(override.aes = list(size = 4, alpha = 1), nrow = 1, title.position = "bottom")
+  )
+p + 
+  labs(
+    caption = "**Data:** NOAA | **Visualization:** @jgranna",
+    title = "**Daily Maximum Temperatures in Portland, 1939 - 2021**"
+  )
+  #ggforce::geom_mark_ellipse(  #--- not included; optional ellipse marking ---#
+  #  aes(fill = new_record, label = new_record, filter = new_record != "", description = desc), 
+  #  alpha = 0.5,color = "00000000", label.colour = "grey20", con.colour = "grey20",
+  #  expand = unit(0, "mm"), con.cap = 5, show.legend = FALSE, label.buffer = unit(25, 'mm'),
+  #  label.fontsize = c(25, 20), label.family = "osans"
+  #)
+```
+
+## Smoothed maximum temperatures
+The three days in June 2021 are clearly visible at the bottom of the graph, close to July. However, possibly due to the mass of points, a time trend is not easily identifyable. In order to improve this, I plot smoothed functions of the 20-years periods. I choose a GAM smoother, which I chose more or less arbitrarily. However, this is sufficient to be able to identify a time trend. That is, maximum temperatures are generally increasing in Portland, which is of course little surprising.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+pal2 <- sequential_hcl(4, palette = "Red-Blue", rev = T)
+p2 <- df %>%
+  ggplot(aes(x = yday, y = tmax)) +
+  theme(
+    axis.text.y = element_text(size = 20, color = pal2, angle = 0, margin = margin(0,3,0,0)),
+    panel.grid.major.y = element_line(color = c(pal2, "#FFFFFF"), linetype = 1)
+  ) +
+  geom_smooth(aes(color = years), alpha = 0.4, size = 0.4, method = "gam", se = F) +
+  scale_color_discrete_sequential(palette = "Plasma") +
+  scale_x_continuous(breaks = months$yday, labels = months$label, expand = c(.001, .001)) + 
+  scale_y_continuous(breaks = c(30, 50, 70, 90), labels = c('30', '50', '70', '90'), limits = c(30, 90), expand = c(.001, .001)) + 
+  coord_polar() +
+  guides(
+    color = guide_legend(override.aes = list(size = 4, alpha = 1), nrow = 1, title.position = "bottom")
+  ) 
+p2 + labs(
+  y = expression(paste("daily temperature (", degree ~ F, ")")),
+  caption = "**Data:** NOAA | **Visualization:** @jgranna",
+  title = "**Daily Maximum Temperatures in Portland, 1939 - 2021**"
+)
+```
+
+## Combine both graphs
+Finally, for a better overview (and practice), I combine both plots using the `patchwork`- package:
+```{r, warning=FALSE, message=FALSE}
+library(patchwork)
+p + theme(legend.position = "none") + p2 + theme(axis.text.y = element_text(margin = margin(0,6,0,4)), axis.title.y = element_blank()) + scale_y_continuous(position = "right") +
+  plot_layout(guides = "collect") +
+  plot_annotation(
+    caption = "**Data:** NOAA | **Visualization:** @jgranna",
+    subtitle = "The left plot shows a scatter plot of maximum temperatures in Portland. The right plot gives the corresponding GAM smooths which makes it easier to visually identify a time trend in the data.", 
+    title = "**Daily Maximum Temperatures in Portland, 1939 - 2021**"
+  ) &
+  theme(plot.caption = element_markdown(margin = margin(0,3,0,0))) 
+```
+
+--------------------------------------------------
+
+Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/main/2021-06-29).
+
+--------------------------------------------------
+
+## Used Packages
+
+- `colorspace`**-package**:  
+<https://colorspace.r-forge.r-project.org/articles/colorspace.html>
+
+- `ggtext`**-package**:  
+<https://wilkelab.org/ggtext/>
+
+- `patchwork`**-package**:  
+<https://patchwork.data-imaginist.com/index.html>
+
+- `showtext`**-package**:  
+<https://github.com/yixuan/showtext>
+
+- `tidyverse`**-package**:  
+<https://www.tidyverse.org/>

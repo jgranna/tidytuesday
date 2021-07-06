@@ -1,0 +1,110 @@
+---
+title: "Independence Days"
+output: html_document
+---
+
+
+```{r setup, include=FALSE, cache = TRUE}
+holiday <- read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-06/holidays.csv")
+```
+
+## Tidy Tuesday
+
+This is my eighth contribution to TidyTuesday, which is 'a weekly podcast and community activity brought to you by the R4DS Online Learning Community'. Their goal is to help R learners learn in real-world contexts. 
+
+For more information, visit the [TidyTuesday homepage](https://www.tidytuesday.com/), check out their [GitHub repository](https://github.com/rfordatascience/tidytuesday) and follow the [R4DS Learning Community on Twitter](https://twitter.com/R4DScommunity).
+
+The purpose of these posts is mainly for exercising purposes. Thus, the provided graphs are not necessarily designed to provide the greatest possible insights. However, I always provide the R code for interested people at the page bottom.
+
+```{r, include=FALSE}
+library(tidyverse)
+library(showtext)
+library(ggtext)
+library(ggplot2)
+library(colorspace)
+#knitr::opts_chunk$set(fig.width=4, fig.height=2.5) 
+holiday <- holiday %>% drop_na(date_parsed)
+holiday$weekday <- factor(holiday$weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"), 
+                          labels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
+```
+
+## Independence Days
+
+This week's data comes from [Wikipedia](https://en.wikipedia.org/wiki/List_of_national_independence_days) and was gathered by [Isabella Velasquez](https://github.com/rfordatascience/tidytuesday/issues/352). It contains the dates of countries when they declared independence.
+
+### Day of the week
+
+I plot the independence days depending on the day of the week as a bar plot:
+
+```{r, warning=FALSE, echo=FALSE}
+font_add_google("Oswald", "oswald")
+showtext_auto()
+ggplot(holiday, aes(x = weekday, fill = weekday)) +
+  theme_minimal(base_family = "oswald", base_size = 25) +
+  geom_histogram(stat = "count") +
+  labs(
+    y = "number of countries",
+    x = "weekday",
+    title = "Busy Saturdays, Calm Sundays",
+    subtitle = "Distribution of declaration of independence over days of the week.",
+    caption = "@jugRanna<br>**Source:** Wikipedia"
+  ) + 
+  scale_fill_discrete_qualitative(palette = "Harmonic") +
+  theme(
+    plot.title.position = "plot", 
+    plot.title = element_text(face = "bold", size = 35, lineheight = 0, margin = margin(1, 0, 0.6, 1)),
+    plot.subtitle = element_text(lineheight = 0.7),
+    axis.title = element_text(face = "bold"),
+    panel.grid.major.x = element_blank(),
+    legend.position = "none",
+    axis.text.x = element_text(vjust = 6, color = hcl.colors(7, palette = "Harmonic")),
+    plot.caption = element_markdown(color = "gray60", lineheight = 0.35),
+    plot.caption.position = "plot"
+  )
+```
+
+It is quite (or little?) surprising that there appears to be a pattern for the weekdays of independence declarations: Work days appear generally less "busy" than Friday and Saturday, but there are clearly less independence declarations on Sundays. 
+
+## Distribution over countries
+Then, I plot the day of the week over the different countries. This time, I want to try the `mapsf`-package: 
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(mapsf)
+world <- ne_countries(scale = "medium", returnclass = "sf")
+world <- world %>%
+  mutate(country = name) %>% 
+  filter(continent != "Antarctica" & continent != "Seven seas (open ocean)") 
+world <- full_join(world, holiday[, c("country", "weekday")])
+mf_theme("dark")
+mf_map(x = world, var = "weekday", type = "typo", pal = "Cold", leg_title = "", leg_pos = "bottomleft", leg_no_data = "NA")
+mf_title("Busy Saturdays, Calm Sundays: Distribution of Independence Declarations over Weekdays")
+mf_credits("@jugRanna\nSource: Wikipedia", pos = "bottomright")
+mf_arrow('topleft')
+```
+
+Over the countries, there does not appear to be a particular pattern regarding which weekday differing countries prefer to declare independence. Just a side note: I prefer using the `sf`-package over the `mapsf` package as its usage is more oriented at the usage of `ggplot` / `tidyr`.
+
+--------------------------------------------------
+
+Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/main/2021-07-06).
+
+--------------------------------------------------
+
+## References
+
+- `colorspace`**-package**:  
+<https://colorspace.r-forge.r-project.org/index.html>
+
+- `ggtext`**-package**:  
+<https://wilkelab.org/ggtext/>
+
+- `mapsf`**-package**:  
+<https://riatelab.github.io/mapsf/index.html>
+
+- `showtext`**-package**:  
+<https://github.com/yixuan/showtext>
+
+- `tidyverse`**-package**:  
+<https://www.tidyverse.org/>

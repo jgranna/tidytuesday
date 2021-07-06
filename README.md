@@ -10,3 +10,4 @@
 2021-05-25: Super Mario Kart
 2021-06-15: Commercial Fishing
 2021-06-29: Canadian Heatwave
+2021-07-06: Independence Days

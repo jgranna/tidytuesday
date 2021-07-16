@@ -17,10 +17,6 @@ For more information, visit the [TidyTuesday homepage](https://www.tidytuesday.c
 The purpose of these posts is mainly for exercising purposes. Thus, the provided graphs are not necessarily designed to provide the greatest possible insights. However, I always provide the R code for interested people at the page bottom.
 
 ```{r, include=FALSE}
-library(tidyverse)
-library(showtext)
-library(ggtext)
-library(ggplot2)
 library(colorspace)
 library(wordcloud2)
 library(tm)
@@ -34,16 +30,17 @@ This week's data comes from [Kaggle](https://www.kaggle.com/williamschooleman/sc
 
 ### Word Cloud for Episode Titles
 
-I plot the frequency of the words in the title as a word cloud:
+The dataset is very large and one could spend a lot of time investigating it. I am interested in which words are used frequently in the episodes' titles. To investigate this descriptively, I plot the frequency of the words in the titles as a word cloud using the `wordcloud2`-package. To make the word cloud take the shape of scooby, I provide a shape image containing the silhouette of Scooby, which was received [here](http://www.fun-with-pictures.com/scooby-doo-silhouette.html):
 
-```{r, warning=FALSE, echo=FALSE, include=FALSE}
-# convert to corpus:
+```{r, eval=FALSE}
+# filter out uninteresting words and interpret "scooby's" as "scooby"
 scooby$title <- gsub("Scooby's", "scooby", scooby$title) 
 scooby$title <- gsub("and", " ", scooby$title) 
 scooby$title <- gsub("The", " ", scooby$title) 
 scooby$title <- gsub("the", " ", scooby$title) 
 scooby$title <- gsub("for", " ", scooby$title) 
 scooby$title <- gsub("from", " ", scooby$title) 
+# convert to corpus:
 docs <- Corpus(VectorSource(scooby$title))
 # Convert the text to lower case
 docs <- tm_map(docs, content_transformer(tolower))
@@ -59,20 +56,23 @@ dtm <- TermDocumentMatrix(docs)
 m <- as.matrix(dtm)
 v <- sort(rowSums(m),decreasing=TRUE)
 d <- data.frame(word = names(v),freq=v)
+# reduce frequeny, so that words fit into graphics device (not ideal!)
 d$freq[1:2] <- 30
-head(d, 10)
-
-font_add_google("Caveat", "caveat")
+# use different colors
 cols <- hcl.colors(982, palette = "Green-Orange")
 set.seed(17721)
-showtext_auto()
-w <- wordcloud2(d, figPath = "~/git/tidytuesday/2021-07-13/_images/scooby.jpg", size = 1, backgroundColor="black", minSize = 2, fontFamily = "caveat", color = cols)
+w <- wordcloud2(d, figPath = "https://github.com/jgranna/tidytuesday/blob/main/2021-07-13/_images/scooby.jpg", size = 1, backgroundColor="black", minSize = 1, color = cols)
 ```
 
+![Scooby Doo](https://raw.githubusercontent.com/jgranna/tidytuesday/main/2021-07-13/_images/export.png)
+
+It is apparent, that "scoobydoo" is used frequently in the episodes' titles. But also the words "mystery", "night", "ghost", etc. occur quite often.  
+
+One could spend much more time to improve the image. Also, the plotting only worked for me in the browser and thus I could not export the image in a "nice way", but had to export it manually from the browser, which is of course not ideal. 
 
 --------------------------------------------------
 
-Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/main/2021-07-06).
+Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/main/2021-07-13).
 
 --------------------------------------------------
 
@@ -81,14 +81,8 @@ Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/ma
 - `colorspace`**-package**:  
 <https://colorspace.r-forge.r-project.org/index.html>
 
-- `ggtext`**-package**:  
-<https://wilkelab.org/ggtext/>
+- `tm`**-package**:  
+<https://tm.r-forge.r-project.org>
 
-- `mapsf`**-package**:  
-<https://riatelab.github.io/mapsf/index.html>
-
-- `showtext`**-package**:  
-<https://github.com/yixuan/showtext>
-
-- `tidyverse`**-package**:  
-<https://www.tidyverse.org/>
+- `wordcloud2`**-package**:  
+<https://github.com/Lchiffon/wordcloud2>

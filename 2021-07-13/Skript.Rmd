@@ -1,0 +1,94 @@
+---
+title: "Independence Days"
+output: html_document
+---
+
+
+```{r setup, include=FALSE, cache = TRUE}
+data <- tidytuesdayR::tt_load("2021-07-13")
+```
+
+## Tidy Tuesday
+
+This is my nineth contribution to TidyTuesday, which is 'a weekly podcast and community activity brought to you by the R4DS Online Learning Community'. Their goal is to help R learners learn in real-world contexts. 
+
+For more information, visit the [TidyTuesday homepage](https://www.tidytuesday.com/), check out their [GitHub repository](https://github.com/rfordatascience/tidytuesday) and follow the [R4DS Learning Community on Twitter](https://twitter.com/R4DScommunity).
+
+The purpose of these posts is mainly for exercising purposes. Thus, the provided graphs are not necessarily designed to provide the greatest possible insights. However, I always provide the R code for interested people at the page bottom.
+
+```{r, include=FALSE}
+library(tidyverse)
+library(showtext)
+library(ggtext)
+library(ggplot2)
+library(colorspace)
+library(wordcloud2)
+library(tm)
+#knitr::opts_chunk$set(fig.width=4, fig.height=2.5) 
+scooby <- data$scoobydoo
+```
+
+## Scooby Doo Episodes
+
+This week's data comes from [Kaggle](https://www.kaggle.com/williamschooleman/scoobydoo-complete) and was aggregated by [plummye](https://www.kaggle.com/williamschooleman). It contains the dates of countries when they declared independence.
+
+### Word Cloud for Episode Titles
+
+I plot the frequency of the words in the title as a word cloud:
+
+```{r, warning=FALSE, echo=FALSE, include=FALSE}
+# convert to corpus:
+scooby$title <- gsub("Scooby's", "scooby", scooby$title) 
+scooby$title <- gsub("and", " ", scooby$title) 
+scooby$title <- gsub("The", " ", scooby$title) 
+scooby$title <- gsub("the", " ", scooby$title) 
+scooby$title <- gsub("for", " ", scooby$title) 
+scooby$title <- gsub("from", " ", scooby$title) 
+docs <- Corpus(VectorSource(scooby$title))
+# Convert the text to lower case
+docs <- tm_map(docs, content_transformer(tolower))
+# Remove numbers
+docs <- tm_map(docs, removeNumbers)
+# Remove punctuations, but keep apostrophes (e.g. don't, not dont)
+docs <- tm_map(docs, removePunctuation, preserve_intra_word_contractions = TRUE)
+# Eliminate extra white spaces
+docs <- tm_map(docs, stripWhitespace)
+
+# create term document matrix
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+d$freq[1:2] <- 30
+head(d, 10)
+
+font_add_google("Caveat", "caveat")
+cols <- hcl.colors(982, palette = "Green-Orange")
+set.seed(17721)
+showtext_auto()
+w <- wordcloud2(d, figPath = "~/git/tidytuesday/2021-07-13/_images/scooby.jpg", size = 1, backgroundColor="black", minSize = 2, fontFamily = "caveat", color = cols)
+```
+
+
+--------------------------------------------------
+
+Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/main/2021-07-06).
+
+--------------------------------------------------
+
+## References
+
+- `colorspace`**-package**:  
+<https://colorspace.r-forge.r-project.org/index.html>
+
+- `ggtext`**-package**:  
+<https://wilkelab.org/ggtext/>
+
+- `mapsf`**-package**:  
+<https://riatelab.github.io/mapsf/index.html>
+
+- `showtext`**-package**:  
+<https://github.com/yixuan/showtext>
+
+- `tidyverse`**-package**:  
+<https://www.tidyverse.org/>

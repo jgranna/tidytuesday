@@ -46,7 +46,7 @@ mandelbrot_vectorized <- function(xmin=-2, xmax=2, nx=500,
   # variables
   x <- seq(xmin, xmax, length.out=nx)
   y <- seq(ymin, ymax, length.out=ny)
-  c <- outer(0.6*x,y*0.6i,FUN="+")
+  c <- outer(x,y*1i,FUN="+")
   z <- matrix(0.0, nrow=length(x), ncol=length(y))
   k <- matrix(0.0, nrow=length(x), ncol=length(y))
   
@@ -62,31 +62,31 @@ mandelbrot_vectorized <- function(xmin=-2, xmax=2, nx=500,
   
 }
 
-# Compare naive vs. vectorized runtimes
-compare_runtimes <- function()
+# Vectorized version
+julia_vectorized <- function(xmin=-1, xmax=1, nx=500,
+                                  ymin=-1, ymax=1, ny=500,
+                                  n=1000, showplot=TRUE,
+                                  cols=colorRampPalette(c("blue","yellow","red","black"))(100)) 
 {
-  system.time(mandelbrot_naive(showplot=F))
-  system.time(mandelbrot_vectorized(showplot=F))
-}
-
-# anders
-mandelbrot <- function(c, iterate_max = 500){
-  z <- 0i
-  for (i in 1:iterate_max) {
-    z <- z ^ 2 + c
-    if (abs(z) > 2.0) {
-      return(i)
-    }
+  
+  # variables
+  x <- seq(xmin, xmax, length.out=nx)
+  y <- seq(ymin, ymax, length.out=ny)
+  c <- -0.8 + 0.2i #-1.0877 + 0.3062i
+  z <- outer(x,y*1i,FUN="+")
+  k <- matrix(0.0, nrow=length(x), ncol=length(y))
+  
+  for (rep in 1:n) { 
+    index <- which(Mod(z) < 1000)
+    z[index] <- z[index]^2 + c
+    k[index] <- k[index] + 1
   }
-  iterate_max
+  
+  if (showplot==TRUE) { image(x,y,k,col=cols, xlab="Re(c)", ylab="Im(c)")}
+  
+  return(k)
+  
 }
-
-mandelbrotImage <- function(xs, ys, iterate_max = 500){
-  sapply(ys, function(y) sapply(xs, function(x) mandelbrot(x + y * 1i, iterate_max = iterate_max))) / iterate_max
-}
-
-xs <- seq(-10, 10)
-ys <- seq(-10, 10)
 
 ##
 youtube

@@ -63,10 +63,11 @@ mandelbrot_vectorized <- function(xmin=-2, xmax=2, nx=500,
 }
 
 # Vectorized version
-library(wesanderson)
-source("./multihue.R")
-julia_vectorized <- function(xmin=0.30782799, xmax=0.30782801, nx=500,
-                                  ymin=0.22938586, ymax=0.22938588, ny=500,
+library(showtext)
+font_add_google("Dancing Script", "lato")
+showtext_auto()
+julia_vectorized <- function(xmin=0.30782799, xmax=0.30782801, nx=5000,
+                                  ymin=0.22938586, ymax=0.22938588, ny=5000,
                                   n=2024, showplot=TRUE,
                                   cols=colorRampPalette(c("blue","yellow","red","black"))(1000)) 
 {
@@ -83,19 +84,26 @@ julia_vectorized <- function(xmin=0.30782799, xmax=0.30782801, nx=500,
     k[index] <- k[index] + 1
   }
   
-  #if (showplot==TRUE) { image(x,y,k,col=cols, xlab="Re(c)", ylab="Im(c)")}
-  stops <- c('#82ebff', '#00fb2f', '#fbb300', "#0333ca", "#a98209",'#ff0505')
-  #palette <- multiHue(200,colors=stops)
-  leftstops <- c("#3136AA","#3980B0","#00C5C0","#8EFDFD")
-  rightstops <- c("#F3F300","#FF8CB4","#CD4C4C","#8F0000")
-  palette <- multiHue.diverge(128,leftstops,rightstops,continuous=FALSE)
-  if (showplot==TRUE) { image(x,y,k,col=palette, xlab="Re(c)", ylab="Im(c)")}
+  colfunc <- colorRampPalette(c('#c8faff', "#ffe266", '#3a80f8', "#d47e14", "#f2c8a1", "#307fc4", '#fbb300', "#ff2000", "#0333ca", "#a98209",'#ff0505', "#000000"))
+  palette <- colfunc(128)
+  if (showplot==TRUE) { 
+    par(bg = "#00225c", mar = c(2, 2, 2, 2))
+    image(x,y,k,col=palette, xlab="", ylab="", xaxt = "n", yaxt = "n")
+    mtext("Julia Set: c = -0.76 + 0.08i", col = "white", side = 1, at = 0.307828006, padj = 0.6, adj = -0.07, family = "lato")
+    }
   return(k)
 }
+
+pdf(file = "~/Desktop/js.pdf", width = 10, height = 8)
+julia_vectorized()
+dev.off()
 
 ## schoene kombos
 # xmin=0.3075, xmax=0.308, nx=500,ymin=0.229, ymax=0.2295
 # xmin=0.307828 - 2e-07, xmax=0.307829 - 2e-07, nx=500, ymin=0.229385, ymax=0.229386
+
+## js_mosaic: at = 0.307828006, padj = 0.6, adj = -0.07, family = "Dancing Script", xmin=0.30782799, xmax=0.30782801, nx=100, ymin=0.22938586, ymax=0.22938588, ny=100
+
 
 ## youtube
 # The Mathemagicians' Guild

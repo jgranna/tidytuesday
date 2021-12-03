@@ -63,9 +63,6 @@ mandelbrot_vectorized <- function(xmin=-2, xmax=2, nx=500,
 }
 
 # Vectorized version
-library(showtext)
-font_add_google("Dancing Script", "lato")
-showtext_auto()
 julia_vectorized <- function(xmin=0.30782799, xmax=0.30782801, nx=5000,
                                   ymin=0.22938586, ymax=0.22938588, ny=5000,
                                   n=2024, showplot=TRUE,
@@ -93,11 +90,49 @@ julia_vectorized <- function(xmin=0.30782799, xmax=0.30782801, nx=5000,
     }
   return(k)
 }
+img <- julia_vectorized()
 
-pdf(file = "~/Desktop/js.pdf", width = 10, height = 8)
-julia_vectorized()
+xmin=0.30782799
+xmax=0.30782801
+nx=5000
+ny=5000
+ymin=0.22938586
+ymax=0.22938588
+pdf(file = "~/js.pdf", width = 10, height = 8)
+x <- seq(xmin, xmax, length.out=nx)
+y <- seq(ymin, ymax, length.out=ny)
+par(bg = "#00225c", mar = c(2, 2, 2, 2))
+image(x,y,img,col=palette, xlab="", ylab="", xaxt = "n", yaxt = "n")
+mtext("Julia Set: c = -0.76 + 0.08i", col = "white", side = 1, at = 0.307828006, padj = 0.6, adj = -0.07, family = "lato")
 dev.off()
 
+load("~/img.rda")
+library(showtext)
+font_add_google("Dancing Script", "lato")
+showtext_auto()
+library(ggplot2)
+library(reshape2)
+longdata <- melt(img)
+colfunc <- colorRampPalette(c('#c8faff', "#ffe266", '#3a80f8', "#d47e14", "#f2c8a1", "#307fc4", '#fbb300', "#ff2000", "#0333ca", "#a98209",'#ff0505', "#000000"))
+palette <- colfunc(128)
+
+pdf(file = "~/js_ggblue_t.pdf", width = 10, height = 8)
+ggplot(longdata, aes(x=Var2, y=Var1)) +
+  geom_raster(aes(fill = value)) +
+  scale_fill_gradientn(colors = palette) + 
+  theme_void() +
+  coord_cartesian(clip = "off") +
+  labs(
+    caption = "Julia Set: c = -0.76 + 0.08i"
+  ) +
+  theme(
+    legend.position = "none",
+    panel.background = element_rect(fill = "#001c35"),
+    plot.margin = margin(2, 2, 2, 2),
+    plot.caption.position = "panel",
+    plot.caption = element_text(family = "lato", size = 15, hjust = 0.94, vjust = 6, color = "white")
+  )
+dev.off()
 ## schoene kombos
 # xmin=0.3075, xmax=0.308, nx=500,ymin=0.229, ymax=0.2295
 # xmin=0.307828 - 2e-07, xmax=0.307829 - 2e-07, nx=500, ymin=0.229385, ymax=0.229386

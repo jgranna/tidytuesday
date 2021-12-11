@@ -106,9 +106,10 @@ image(x,y,img,col=palette, xlab="", ylab="", xaxt = "n", yaxt = "n")
 mtext("Julia Set: c = -0.76 + 0.08i", col = "white", side = 1, at = 0.307828006, padj = 0.6, adj = -0.07, family = "lato")
 dev.off()
 
-load("~/img.rda")
+load("~/../Downloads/img.rda")
 library(showtext)
 font_add_google("Dancing Script", "lato")
+font_add_google("Great Vibes", "lato")
 showtext_auto()
 library(ggplot2)
 library(reshape2)
@@ -133,6 +134,30 @@ ggplot(longdata, aes(x=Var2, y=Var1)) +
     plot.caption = element_text(family = "lato", size = 15, hjust = 0.94, vjust = 6, color = "white")
   )
 dev.off()
+
+# no frame
+pdf(file = "~/js_ggnoframe.pdf", width = 10, height = 8)
+ggplot(longdata, aes(x=Var2, y=Var1)) +
+  geom_raster(aes(fill = value)) +
+  scale_fill_gradientn(colors = palette) + 
+  theme_void() +
+  annotate(
+    "text",
+    x = 4250,
+    y = 150,
+    label = "Julia Set: c = -0.76 + 0.08i",
+    color = "black",
+    family = "lato",
+    size = 7
+  ) +
+  theme(
+    legend.position = "none",
+    plot.margin  = margin(0, 0, 0, 0, "cm")
+  ) +
+  scale_y_continuous(expand = c(0,0)) + 
+  scale_x_continuous(expand = c(0,0))
+dev.off()
+
 ## schoene kombos
 # xmin=0.3075, xmax=0.308, nx=500,ymin=0.229, ymax=0.2295
 # xmin=0.307828 - 2e-07, xmax=0.307829 - 2e-07, nx=500, ymin=0.229385, ymax=0.229386

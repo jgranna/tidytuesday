@@ -63,8 +63,8 @@ mandelbrot_vectorized <- function(xmin=-2, xmax=2, nx=500,
 }
 
 # Vectorized version
-julia_vectorized <- function(xmin=0.30782799, xmax=0.30782801, nx=5000,
-                                  ymin=0.22938586, ymax=0.22938588, ny=5000,
+julia_vectorized <- function(xmin=0.30782799, xmax=0.30782801, nx=10000,
+                                  ymin=0.22938586, ymax=0.22938588, ny=10000,
                                   n=2024, showplot=TRUE,
                                   cols=colorRampPalette(c("blue","yellow","red","black"))(1000)) 
 {
@@ -90,15 +90,16 @@ julia_vectorized <- function(xmin=0.30782799, xmax=0.30782801, nx=5000,
     }
   return(k)
 }
-img <- julia_vectorized()
+img <- julia_vectorized(showplot = FALSE)
+save(img, file = "~/img.rda")
 
 xmin=0.30782799
 xmax=0.30782801
-nx=5000
-ny=5000
+nx=10000
+ny=10000
 ymin=0.22938586
 ymax=0.22938588
-pdf(file = "~/js.pdf", width = 10, height = 8)
+png(filename = "~/png", width = 7200, height = 5760)
 x <- seq(xmin, xmax, length.out=nx)
 y <- seq(ymin, ymax, length.out=ny)
 par(bg = "#00225c", mar = c(2, 2, 2, 2))
@@ -106,7 +107,7 @@ image(x,y,img,col=palette, xlab="", ylab="", xaxt = "n", yaxt = "n")
 mtext("Julia Set: c = -0.76 + 0.08i", col = "white", side = 1, at = 0.307828006, padj = 0.6, adj = -0.07, family = "lato")
 dev.off()
 
-load("~/../Downloads/img.rda")
+load("~/img.rda")
 library(showtext)
 font_add_google("Dancing Script", "lato")
 font_add_google("Great Vibes", "lato")
@@ -117,7 +118,7 @@ longdata <- melt(img)
 colfunc <- colorRampPalette(c('#c8faff', "#ffe266", '#3a80f8', "#d47e14", "#f2c8a1", "#307fc4", '#fbb300', "#ff2000", "#0333ca", "#a98209",'#ff0505', "#000000"))
 palette <- colfunc(128)
 
-pdf(file = "~/js_ggblue_t.pdf", width = 10, height = 8)
+pdf(filename = "~/js_ggblue_t.png", width = 7200, height = 5760)
 ggplot(longdata, aes(x=Var2, y=Var1)) +
   geom_raster(aes(fill = value)) +
   scale_fill_gradientn(colors = palette) + 
@@ -136,7 +137,7 @@ ggplot(longdata, aes(x=Var2, y=Var1)) +
 dev.off()
 
 # no frame
-pdf(file = "~/js_ggnoframe.pdf", width = 10, height = 8)
+png(filename = "~/js_ggnoframe.png", width = 7200, height = 5760)
 ggplot(longdata, aes(x=Var2, y=Var1)) +
   geom_raster(aes(fill = value)) +
   scale_fill_gradientn(colors = palette) + 

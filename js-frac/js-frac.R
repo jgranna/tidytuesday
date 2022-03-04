@@ -108,13 +108,16 @@ mtext("Julia Set: c = -0.76 + 0.08i", col = "white", side = 1, at = 0.307828006,
 dev.off()
 
 load("~/img.rda")
-library(showtext)
 font_add_google("Dancing Script", "lato")
+
+library(showtext)
 font_add_google("Great Vibes", "lato")
 showtext_auto()
 library(ggplot2)
 library(reshape2)
-longdata <- melt(img)
+library(data.table)
+longdata <- as.data.table(reshape2::melt(img))
+rm(img)
 colfunc <- colorRampPalette(c('#c8faff', "#ffe266", '#3a80f8', "#d47e14", "#f2c8a1", "#307fc4", '#fbb300', "#ff2000", "#0333ca", "#a98209",'#ff0505', "#000000"))
 palette <- colfunc(128)
 
@@ -137,19 +140,19 @@ ggplot(longdata, aes(x=Var2, y=Var1)) +
 dev.off()
 
 # no frame
-png(filename = "~/js_ggnoframe.png", width = 7200, height = 5760)
+pdf(file = "js_ggnoframe.pdf", width = 10, height = 8)
 ggplot(longdata, aes(x=Var2, y=Var1)) +
   geom_raster(aes(fill = value)) +
   scale_fill_gradientn(colors = palette) + 
   theme_void() +
   annotate(
     "text",
-    x = 4250,
-    y = 150,
+    x = 8100,
+    y = 500,
     label = "Julia Set: c = -0.76 + 0.08i",
     color = "black",
     family = "lato",
-    size = 7
+    size = 8.5
   ) +
   theme(
     legend.position = "none",

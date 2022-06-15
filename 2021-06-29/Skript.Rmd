@@ -50,7 +50,7 @@ theme_update(
   plot.caption = element_markdown(size = 10, color = "gray60", margin = margin(0, 0, 3, 0)),
   plot.caption.position = "plot",
   legend.text = element_text(size = 20),
-  legend.position = "bottom",
+  legend.position = "none",
   legend.title = element_text(face = "bold", hjust = 0.5, margin = margin(0,0,3,0), size = 20),
   axis.title.y = element_text(angle = 90, margin = margin(-50,5,20,5), hjust = 0.83, size = 20),
   axis.ticks.y = element_line(color = "gray20", size = 1.5),
@@ -66,6 +66,7 @@ theme_update(
 )
 ```
 ```{r, warning=FALSE}
+png("")
 p <- df %>%
   ggplot(aes(x = yday, y = tmax)) +
   geom_point(aes(color = years), alpha = 0.4, size = 0.4) +

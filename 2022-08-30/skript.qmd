@@ -1,0 +1,102 @@
+---
+title: "Pell Grants"
+format: html
+editor: visual
+---
+
+```{r setup, include=TRUE, eval=FALSE}
+data <- tidytuesdayR::tt_load("2022-08-30")
+```
+
+## Tidy Tuesday
+
+This is my tenth contribution to TidyTuesday, which is 'a weekly podcast and community activity brought to you by the R4DS Online Learning Community'. Their goal is to help R learners learn in real-world contexts.
+
+For more information, visit the [TidyTuesday homepage](https://www.tidytuesday.com/), check out their [GitHub repository](https://github.com/rfordatascience/tidytuesday) and follow the [R4DS Learning Community on Twitter](https://twitter.com/R4DScommunity).
+
+The purpose of these posts is mainly for exercising purposes. Thus, the provided graphs are not necessarily designed to provide the greatest possible insights. However, I always provide the R code for interested people at the page bottom.
+
+*Note:* This is the first post I generate using [Quarto](https://quarto.org/), 'an open-source scientific and technical publishing system built on Pandoc'. I will use it frequently in my following posts.
+
+```{r, include=FALSE, eval=TRUE}
+#knitr::opts_chunk$set(fig.width=4, fig.height=2.5) 
+load('~/Desktop/pell.rda')
+```
+
+```{r}
+library(colorspace)
+library(knitr)
+library(sf)
+library(ggplot2)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(ggpattern)
+```
+
+## Pell Grants
+
+This week's data comes from [US Department of Education](https://curious-joe.github.io/pell/articles/download.html). It is also available via the [Pell Grant](https://www2.ed.gov/programs/fpg/index.html) on CRAN. More details about the data can also be found in the package's vignette. It contains 100474 observations of six variables (state, award, recipient, name, session, year). This is a quick look at the variables and their meaning (from the Tidy Tuesday vignette):
+
+| variable  | class   | description                              |
+|-----------|---------|------------------------------------------|
+| STATE     | integer | State shortcode                          |
+| AWARD     | double  | Award amount in USD                      |
+| RECIPIENT | double  | Total number of recipients by year, name |
+| NAME      | integer | Name of college / university             |
+| SESSION   | integer | Session group                            |
+| YEAR      | integer | Year                                     |
+
+: Variable description
+
+### Highest number of awards per university
+
+To start out, I take a quick look at the universities who received the highest (and lowest) total amount of grants over the complete time horizon (1999 - 2017):
+
+```{r}
+pell <- na.omit(pell)
+kable(
+  head(sort(tapply(pell$AWARD, pell$NAME, sum), decreasing = TRUE)),
+      col.names = c("Total grant money received")
+)
+```
+I use the `kable()` function from the `knitr` package in order to directly convert the R output to a table that can be displayed on this website. There are of course other possible ways to summarize the data, and some applicants prefer functions from the `tidyverse` package. I however, do not.
+
+```{r}
+kable(
+  head(sort(tapply(pell$AWARD, pell$NAME, sum), decreasing = FALSE)),
+      col.names = c("Total grant money received")
+)
+```
+
+Students from the University of Phoenix have received the most fundings from the Pell grant over the whole time horizon, totalling up to almost 7 billion USD from 1999-2017. Some universities / colleges, like Claremont Graduate University, have received no Pell Grants in the regarded horizon. 
+
+### Distribution of grants over the states
+
+Another interesting aspect is the distribution of grants over the states in the US. I look at this aspect using a map generated again with the `sf` package.
+
+```{r}
+# download the data for the US map with states
+us_states <- tigris::states(class = "sf", cb = T)
+
+# summarize grants per state via tapply and merge with map data
+funds <- as.data.frame(tapply(pell$AWARD, pell$STATE, sum))
+funds$state <- rownames(funds)
+rownames(funds) <- NULL
+names(funds) <- c("amount", "STUSPS")
+funds$amount <- funds$amount / 1000000000
+a <- merge(us_states, funds, by = "STUSPS")
+
+# actual plot
+ggplot(a) +
+  geom_sf(aes(fill = amount)) +
+  scale_fill_binned_sequential(palette = "Greens 3") +
+  coord_sf(crs = st_crs(2163), xlim = c(-2500000, 2500000), ylim = c(-2300000, 
+         730000)) +
+  theme(
+    legend.position = "bottom",
+    
+  ) +
+  guides(fill = guide_colorsteps(title.position = 'bottom', even.steps = TRUE,
+                                 barwidth = 20, barheight = 0.5,
+                                  title.hjust = .5)) 
+```

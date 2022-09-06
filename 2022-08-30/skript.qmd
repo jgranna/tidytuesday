@@ -20,17 +20,20 @@ The purpose of these posts is mainly for exercising purposes. Thus, the provided
 
 ```{r, include=FALSE, eval=TRUE}
 #knitr::opts_chunk$set(fig.width=4, fig.height=2.5) 
-load('~/Desktop/pell.rda')
+load('~/pell.rda')
 ```
 
 ```{r}
 library(colorspace)
 library(knitr)
 library(sf)
+library(ggtext)
 library(ggplot2)
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(ggpattern)
+library(showtext)
+
 ```
 
 ## Pell Grants
@@ -59,6 +62,7 @@ kable(
       col.names = c("Total grant money received")
 )
 ```
+
 I use the `kable()` function from the `knitr` package in order to directly convert the R output to a table that can be displayed on this website. There are of course other possible ways to summarize the data, and some applicants prefer functions from the `tidyverse` package. I however, do not.
 
 ```{r}
@@ -68,13 +72,13 @@ kable(
 )
 ```
 
-Students from the University of Phoenix have received the most fundings from the Pell grant over the whole time horizon, totalling up to almost 7 billion USD from 1999-2017. Some universities / colleges, like Claremont Graduate University, have received no Pell Grants in the regarded horizon. 
+Students from the University of Phoenix have received the most fundings from the Pell grant over the whole time horizon, totalling up to almost 7 billion USD from 1999-2017. Some universities / colleges, like Claremont Graduate University, have received no Pell Grants in the regarded horizon.
 
 ### Distribution of grants over the states
 
-Another interesting aspect is the distribution of grants over the states in the US. I look at this aspect using a map generated again with the `sf` package.
+Another interesting aspect is the distribution of grants over the states in the US. I look at this aspect using a map generated again with the `sf` package. A new package I just discovered is the `ggpattern` package. I want to try this package and use it to color the background behind the actual map.
 
-```{r}
+```{r, echo=FALSE,results='hide'}
 # download the data for the US map with states
 us_states <- tigris::states(class = "sf", cb = T)
 
@@ -85,18 +89,79 @@ rownames(funds) <- NULL
 names(funds) <- c("amount", "STUSPS")
 funds$amount <- funds$amount / 1000000000
 a <- merge(us_states, funds, by = "STUSPS")
+font_add_google("Open Sans", "osans")
+font_add_google("Qwitcher Grypen", "qwitcher")
+```
 
+```{r}
 # actual plot
-ggplot(a) +
+theme_set(theme(text = element_text(family = "osans", size = 25)))
+showtext_auto()
+ggplot(a) + 
+  geom_rect_pattern(aes(xmin = -3000000, xmax =3000000, ymin = -3000000, ymax = 900000), pattern = "magick",
+                    fill = "#dcf1ff", pattern_type = 'gray15', pattern_scale = 2, 
+                    pattern_colour = "#007ed3", pattern_alpha = 0.002, pattern_angle = 40) +
   geom_sf(aes(fill = amount)) +
-  scale_fill_binned_sequential(palette = "Greens 3") +
+  scale_fill_binned_sequential(palette = "Blue-Yellow") +
   coord_sf(crs = st_crs(2163), xlim = c(-2500000, 2500000), ylim = c(-2300000, 
          730000)) +
+  labs(
+    title = bquote(bold("Pell Awards Granted in the US")),
+    subtitle = "from 1999 to 2017",
+    fill = bquote(bold("Grant amount")~" (in billion USD)"),
+    caption = "@jugRanna<br>**Source:** US Department of Education"
+  ) +
   theme(
+    plot.title = element_text(family = "qwitcher", size = 55, lineheight = 0, margin = margin(1, 0, 0.1, 1), vjust = -0.7),
+    plot.subtitle = element_text(family = "qwitcher", size = 45, lineheight = 0.35, vjust = 0.4),
     legend.position = "bottom",
-    
+    legend.background = element_rect(fill = '#ebf1f5', color = '#ebf1f5'),
+    panel.background = element_rect(fill = 'white', color = 'black'),
+    plot.background = element_rect(fill = "#ebf1f5", color = "#ebf1f5"),
+    plot.title.position = "plot",
+    panel.border = element_rect(color = "black", fill = NA, size = 2),
+    plot.caption = element_markdown(color = "gray60", lineheight = 0.35, hjust = 1, size = 20),
+    plot.caption.position = "plot"
   ) +
   guides(fill = guide_colorsteps(title.position = 'bottom', even.steps = TRUE,
                                  barwidth = 20, barheight = 0.5,
                                   title.hjust = .5)) 
 ```
+It is apparant that students in California have received the most money from the Pell Grant, more than 40 billion USD between 1999 and 2017. A close look at the number of universities / colleges reveals why that is the case (or at least part of the reason):
+```{r}
+kable(
+  head(
+    sort(table(pell$STATE), decreasing = TRUE)
+  )
+)
+```
+California has by far the most universities / colleges in the country. Other states that show higher numbers in schools also receive more money from the Pell Grant. 
+
+--------------------------------------------------
+
+Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/main/2022-08-30).
+
+--------------------------------------------------
+
+## References
+
+- `colorspace`**-package**:  
+<https://colorspace.r-forge.r-project.org/index.html>
+
+- `knitr`**-package**:  
+<https://yihui.org/knitr/>
+
+- `sf`**-package**:  
+<https://r-spatial.github.io/sf/>
+
+- `rnaturalearth`**-package**:  
+<https://docs.ropensci.org/rnaturalearth/>
+
+- `ggpattern`**-package**:  
+<https://coolbutuseless.github.io/package/ggpattern/index.html>
+
+- `showtext`**-package**:  
+<https://cran.r-project.org/web/packages/showtext/index.html>
+
+- `ggtext`-**-package**:
+<https://wilkelab.org/ggtext/>

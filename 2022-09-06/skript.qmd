@@ -1,0 +1,219 @@
+---
+title: "LEGO sets"
+format: html
+editor: visual
+---
+
+```{r setup, include=TRUE, eval=FALSE}
+# data <- tidytuesdayR::tt_load("2022-09-06")
+inventories <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-09-06/inventories.csv.gz')
+inventory_sets <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-09-06/inventory_sets.csv.gz')
+sets <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-09-06/sets.csv.gz')
+lego <- left_join(inventories, inventory_sets, by = "set_num") |>
+  left_join(sets, by = "set_num") 
+```
+
+## Tidy Tuesday
+
+This is my eleventh contribution to TidyTuesday, which is 'a weekly podcast and community activity brought to you by the R4DS Online Learning Community'. Their goal is to help R learners learn in real-world contexts.
+
+For more information, visit the [TidyTuesday homepage](https://www.tidytuesday.com/), check out their [GitHub repository](https://github.com/rfordatascience/tidytuesday) and follow the [R4DS Learning Community on Twitter](https://twitter.com/R4DScommunity).
+
+The purpose of these posts is mainly for exercising purposes. Thus, the provided graphs are not necessarily designed to provide the greatest possible insights. However, I always provide the R code for interested people at the page bottom.
+
+```{r, include=FALSE, eval=TRUE}
+#knitr::opts_chunk$set(fig.width=4, fig.height=2.5) 
+# load locally to save requests on TT server
+load('lego-sets.rda')
+```
+
+```{r, echo=FALSE}
+library(bamlss)
+library(parallel)
+library(colorspace)
+library(ggtext)
+library(ggplot2)
+library(ggpattern)
+library(shadowtext)
+library(patchwork)
+library(showtext)
+library(tidyr)
+library(rlist)
+```
+
+## LEGO sets
+
+This week's data comes from [rebrickable](https://rebrickable.com/downloads/) courtesy of [Georgios Karamanis](https://github.com/rfordatascience/tidytuesday/issues/455). The dataset contains 35,023 observations of LEGO sets over a time horizon from 1949 to 2022. This is a quick look at the variables (from the Tidy Tuesday vignette):
+
+| variable     | class     | description |
+|--------------|-----------|-------------|
+| id           | integer   | variable    |
+| version      | double    | variable    |
+| set_num      | character | variable    |
+| inventory_id | double    | variable    |
+| name         | character | variable    |
+| quantity     | double    | variable    |
+| year         | double    | variable    |
+| theme_id     | double    | variable    |
+| num_parts    | double    | variable    |
+| img_url      | character | variable    |
+
+: Variable description
+
+The descriptions are in this case not very informative.
+
+### Goals
+
+The data offers a lot to visualize. One could of course, for example, use the `ggpattern` package again to include nice LEGO backgrounds. This week, however, I want to provide a quick example of Bayesian distributional regression, where a whole distribution is fit to the data, instead of, e.g. just the mean. For this purpose, I will be using the `bamlss` package. I want to pay a special focus on how the distribution of the number of parts in LEGO sets has changed over time.
+
+### Descriptives: Density plots
+
+To gain a first overview, I plot the corresponding distributions over time. Here, I actually decided to use the `ggpattern` package to plot the densities in a nice LEGO style. To keep things cleaner, I first cut the complete time horizon into strips:
+
+```{r}
+# data cleaning first, also remove entries w/ less than 10 # of parts to regard actual sets
+lego <- subset(lego, !is.na(year) & !is.na(num_parts) & num_parts >= 10)
+lego$time_cut <- cut(lego$year, breaks = c(1949, 1975, 2010, 2022), include.lowest = TRUE)
+levels(lego$time_cut) <- c("1949 - 1975", "1976 - 2010", "2011 - 2022")
+
+# actual density plot
+legend.title = "years"
+plot1 <- ggplot(lego) +
+  theme_minimal() +
+  geom_density_pattern(aes(x = num_parts, fill = time_cut, color = time_cut, 
+                           pattern_fill = time_cut, pattern_color = time_cut),
+                       pattern = "circle",
+                       pattern_angle = 90, 
+                       pattern_density = 0.5) +
+  scale_pattern_fill_manual(values = c("#a80005", "#0031c3", "#006906")) +
+  scale_pattern_color_manual(values = c("#a80005", "#0031c3", "#006906")) +
+  scale_fill_manual(values = c("#e40004", "#0044ff", "#008607")) +
+  scale_color_manual(values = c("#e40004", "#0044ff", "#008607")) +
+  scale_x_log10() +
+  labs(
+    fill = legend.title,
+    color = legend.title, 
+    pattern_fill = legend.title,
+    pattern_color = legend.title,
+    x = "number of parts"
+  ) +
+  theme(
+    legend.position = c(0.875, 0.85),
+  )
+plot1
+```
+
+From the plot it seems that over the years, the number of parts in LEGO sets has increased both with regard to its expected value and its variance. There is a gradual shift from the left to the right. This could of course be part of some diversification strategy of LEGO (of course, this is just speculation).
+
+### Bayesian Distributional Regression
+
+Now, as explained earlier, I employ the `bamlss` package to model the number of parts' distribution. Of course, it would be good to first look for an appropriate distribution to fit to the data. I don't undergo this procedure in this case, however.
+
+```{r, echo=FALSE}
+# define a formula, I want to model both the mean and the variance of the dist
+f <- list(log(num_parts) ~ s(year, k = 20), sigma ~ s(year, k = 15))
+
+# fit bamlss model; order by year for later plotting
+set.seed(080922)
+m <- bamlss(f, family = "gaussian", data = lego[order(lego$year), ])
+```
+
+A first glance at the model:
+
+```{r}
+par(mfrow = c(1, 2))
+plot(m)
+```
+
+It is interesting to see that both the mean and variance (or standard deviation) of the number of parts increases gradually with time. The strategy to release sets with more parts and increasing the variance at the same time thus does not seem to be a sudden decision, but instead a strategy that has been adjusted gradually. This is of course just a first look at the data and conclusions have to be regarded cautiously.
+
+### Bayesian Plots
+
+Now, I finally take the first plot and make a visually (somewhat) nice plot out of it.
+
+```{r}
+# to speed things up, don't use all samples, but just 200
+smpl <- sample(1000, 100)
+
+# get predictions from sampled coefficients
+p.mu <- predict(m, model = "mu", type ="parameter", FUN = function(x) {x})
+
+# bias correction: mean of exp(residuals)
+h_0 <- mean(exp(residuals(m)))
+p.mu <- lapply(smpl, function(x) h_0 * exp(p.mu[[x]]))
+p.final.mu <- h_0 * exp(predict(m, model = "mu", type = "parameter"))
+
+# convert into tidy format for ggplot
+plot.tab.mu <- do.call(cbind, p.mu)
+plot.tab.mu <- cbind(lego[order(lego$year), ]$year, plot.tab.mu)
+plot.tab.mu <- data.frame(plot.tab.mu)
+plot.tab.mu <- plot.tab.mu %>% pivot_longer(X2:X101, values_to = "predictions")
+
+# plot mu
+p2 <- ggplot(subset(plot.tab.mu, name %in% paste0("X", 2:10)), aes(x = X1, y = predictions, group = name)) +
+  geom_line(col = alpha("yellow", 0.03))
+p2
+```
+
+```{r}
+# get predictions for sigma
+p.sigma <- predict(m, model = "sigma", type ="parameter", FUN = function(x) {x})
+p.final.sigma <- predict(m, model = "sigma", type = "parameter")
+p.final.sigma <- exp(p.final.sigma)
+
+# transformation of sigma
+p.sigma <- lapply(smpl, function(x) exp(p.sigma[[x]]))
+
+# convert into tidy format for ggplot
+plot.tab.sigma <- do.call(cbind, p.sigma)
+plot.tab.sigma <- cbind(lego[order(lego$year), ]$year, plot.tab.sigma)
+plot.tab.sigma <- data.frame(plot.tab.sigma)
+plot.tab.sigma <- plot.tab.sigma %>% pivot_longer(X2:X101, values_to = "predictions")
+
+# plot mu
+p3 <- ggplot(subset(plot.tab.sigma, name %in% paste0("X", 2:101)), aes(x = X1, y = predictions, group = name)) +
+  geom_line(col = alpha("yellow", 0.05))
+p3
+```
+
+### Final Plot
+
+Now, I add everything together with the `patchwork` package.
+
+```{r}
+logo <- ggplot() +                      # Draw ggplot2 plot with text only
+    theme_void() +
+    geom_rect(aes(xmin = 0.9, xmax = 1.1, ymin = 0.9, ymax = 1.1), fill = "red") +
+    geom_shadowtext(aes(x = 1, y = 1, label = "LEGO", family = "sri"), bg.color = "yellow", bg.r = 0.18, size = 35, fontface = "italic") +
+  geom_shadowtext(aes(x = 1, y = 1, label = "LEGO", family = "sri"), bg.color = "black", size = 35,
+                  fontface = "italic")
+logo
+```
+
+------------------------------------------------------------------------
+
+Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/main/2022-09-06).
+
+------------------------------------------------------------------------
+
+## References
+
+-   `colorspace`**-package**:\
+    <https://colorspace.r-forge.r-project.org/index.html>
+
+-   `knitr`**-package**:\
+    <https://yihui.org/knitr/>
+
+-   `sf`**-package**:\
+    <https://r-spatial.github.io/sf/>
+
+-   `rnaturalearth`**-package**:\
+    <https://docs.ropensci.org/rnaturalearth/>
+
+-   `ggpattern`**-package**:\
+    <https://coolbutuseless.github.io/package/ggpattern/index.html>
+
+-   `showtext`**-package**:\
+    <https://cran.r-project.org/web/packages/showtext/index.html>
+
+-   `ggtext`-**-package**: <https://wilkelab.org/ggtext/>

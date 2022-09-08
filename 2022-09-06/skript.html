@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.0.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>LEGO sets</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="skript_files/libs/clipboard/clipboard.min.js"></script>
+<script src="skript_files/libs/quarto-html/quarto.js"></script>
+<script src="skript_files/libs/quarto-html/popper.min.js"></script>
+<script src="skript_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="skript_files/libs/quarto-html/anchor.min.js"></script>
+<link href="skript_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="skript_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="skript_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="skript_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="skript_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">LEGO sets</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># data &lt;- tidytuesdayR::tt_load("2022-09-06")</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>inventories <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">'https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-09-06/inventories.csv.gz'</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>inventory_sets <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">'https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-09-06/inventory_sets.csv.gz'</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>sets <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">'https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-09-06/sets.csv.gz'</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>lego <span class="ot">&lt;-</span> <span class="fu">left_join</span>(inventories, inventory_sets, <span class="at">by =</span> <span class="st">"set_num"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(sets, <span class="at">by =</span> <span class="st">"set_num"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="tidy-tuesday" class="level2">
+<h2 class="anchored" data-anchor-id="tidy-tuesday">Tidy Tuesday</h2>
+<p>This is my eleventh contribution to TidyTuesday, which is ‘a weekly podcast and community activity brought to you by the R4DS Online Learning Community’. Their goal is to help R learners learn in real-world contexts.</p>
+<p>For more information, visit the <a href="https://www.tidytuesday.com/">TidyTuesday homepage</a>, check out their <a href="https://github.com/rfordatascience/tidytuesday">GitHub repository</a> and follow the <a href="https://twitter.com/R4DScommunity">R4DS Learning Community on Twitter</a>.</p>
+<p>The purpose of these posts is mainly for exercising purposes. Thus, the provided graphs are not necessarily designed to provide the greatest possible insights. However, I always provide the R code for interested people at the page bottom.</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: coda</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: colorspace</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: mgcv</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: nlme</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>This is mgcv 1.8-40. For overview type 'help("mgcv-package")'.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'bamlss'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:mgcv':
+
+    smooth.construct</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: sysfonts</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: showtextdb</code></pre>
+</div>
+</div>
+</section>
+<section id="lego-sets" class="level2">
+<h2 class="anchored" data-anchor-id="lego-sets">LEGO sets</h2>
+<p>This week’s data comes from <a href="https://rebrickable.com/downloads/">rebrickable</a> courtesy of <a href="https://github.com/rfordatascience/tidytuesday/issues/455">Georgios Karamanis</a>. The dataset contains 35,023 observations of LEGO sets over a time horizon from 1949 to 2022. This is a quick look at the variables (from the Tidy Tuesday vignette):</p>
+<table class="table">
+<caption>Variable description</caption>
+<thead>
+<tr class="header">
+<th>variable</th>
+<th>class</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>id</td>
+<td>integer</td>
+<td>variable</td>
+</tr>
+<tr class="even">
+<td>version</td>
+<td>double</td>
+<td>variable</td>
+</tr>
+<tr class="odd">
+<td>set_num</td>
+<td>character</td>
+<td>variable</td>
+</tr>
+<tr class="even">
+<td>inventory_id</td>
+<td>double</td>
+<td>variable</td>
+</tr>
+<tr class="odd">
+<td>name</td>
+<td>character</td>
+<td>variable</td>
+</tr>
+<tr class="even">
+<td>quantity</td>
+<td>double</td>
+<td>variable</td>
+</tr>
+<tr class="odd">
+<td>year</td>
+<td>double</td>
+<td>variable</td>
+</tr>
+<tr class="even">
+<td>theme_id</td>
+<td>double</td>
+<td>variable</td>
+</tr>
+<tr class="odd">
+<td>num_parts</td>
+<td>double</td>
+<td>variable</td>
+</tr>
+<tr class="even">
+<td>img_url</td>
+<td>character</td>
+<td>variable</td>
+</tr>
+</tbody>
+</table>
+<p>The descriptions are in this case not very informative.</p>
+<section id="goals" class="level3">
+<h3 class="anchored" data-anchor-id="goals">Goals</h3>
+<p>The data offers a lot to visualize. One could of course, for example, use the <code>ggpattern</code> package again to include nice LEGO backgrounds. This week, however, I want to provide a quick example of Bayesian distributional regression, where a whole distribution is fit to the data, instead of, e.g.&nbsp;just the mean. For this purpose, I will be using the <code>bamlss</code> package. I want to pay a special focus on how the distribution of the number of parts in LEGO sets has changed over time.</p>
+</section>
+<section id="descriptives-density-plots" class="level3">
+<h3 class="anchored" data-anchor-id="descriptives-density-plots">Descriptives: Density plots</h3>
+<p>To gain a first overview, I plot the corresponding distributions over time. Here, I actually decided to use the <code>ggpattern</code> package to plot the densities in a nice LEGO style. To keep things cleaner, I first cut the complete time horizon into strips:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># data cleaning first, also remove entries w/ less than 10 # of parts to regard actual sets</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>lego <span class="ot">&lt;-</span> <span class="fu">subset</span>(lego, <span class="sc">!</span><span class="fu">is.na</span>(year) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(num_parts) <span class="sc">&amp;</span> num_parts <span class="sc">&gt;=</span> <span class="dv">10</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>lego<span class="sc">$</span>time_cut <span class="ot">&lt;-</span> <span class="fu">cut</span>(lego<span class="sc">$</span>year, <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">1949</span>, <span class="dv">1975</span>, <span class="dv">2010</span>, <span class="dv">2022</span>), <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(lego<span class="sc">$</span>time_cut) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"1949 - 1975"</span>, <span class="st">"1976 - 2010"</span>, <span class="st">"2011 - 2022"</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># actual density plot</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>legend.title <span class="ot">=</span> <span class="st">"years"</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(lego) <span class="sc">+</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_pattern</span>(<span class="fu">aes</span>(<span class="at">x =</span> num_parts, <span class="at">fill =</span> time_cut, <span class="at">color =</span> time_cut, </span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>                           <span class="at">pattern_fill =</span> time_cut, <span class="at">pattern_color =</span> time_cut),</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>                       <span class="at">pattern =</span> <span class="st">"circle"</span>,</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>                       <span class="at">pattern_angle =</span> <span class="dv">90</span>, </span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>                       <span class="at">pattern_density =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_pattern_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#a80005"</span>, <span class="st">"#0031c3"</span>, <span class="st">"#006906"</span>)) <span class="sc">+</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_pattern_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#a80005"</span>, <span class="st">"#0031c3"</span>, <span class="st">"#006906"</span>)) <span class="sc">+</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#e40004"</span>, <span class="st">"#0044ff"</span>, <span class="st">"#008607"</span>)) <span class="sc">+</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#e40004"</span>, <span class="st">"#0044ff"</span>, <span class="st">"#008607"</span>)) <span class="sc">+</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> legend.title,</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> legend.title, </span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">pattern_fill =</span> legend.title,</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">pattern_color =</span> legend.title,</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"number of parts"</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="fu">c</span>(<span class="fl">0.875</span>, <span class="fl">0.85</span>),</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="skript_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>From the plot it seems that over the years, the number of parts in LEGO sets has increased both with regard to its expected value and its variance. There is a gradual shift from the left to the right. This could of course be part of some diversification strategy of LEGO (of course, this is just speculation).</p>
+</section>
+<section id="bayesian-distributional-regression" class="level3">
+<h3 class="anchored" data-anchor-id="bayesian-distributional-regression">Bayesian Distributional Regression</h3>
+<p>Now, as explained earlier, I employ the <code>bamlss</code> package to model the number of parts’ distribution. Of course, it would be good to first look for an appropriate distribution to fit to the data. I don’t undergo this procedure in this case, however.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>AICc 230806.1 logPost -115482. logLik -115388. edf 14.847 eps 0.4881 iteration   1
+AICc 228546.2 logPost -114394. logLik -114255. edf 17.144 eps 0.0700 iteration   2
+AICc 227862.5 logPost -114072. logLik -113912. edf 18.901 eps 0.0424 iteration   3
+AICc 227646.6 logPost -113998. logLik -113800. edf 22.844 eps 0.0189 iteration   4
+AICc 227530.8 logPost -113979. logLik -113737. edf 28.213 eps 0.0326 iteration   5
+AICc 227501.4 logPost -113987. logLik -113718. edf 32.306 eps 0.0162 iteration   6
+AICc 227496.7 logPost -114002. logLik -113715. edf 32.383 eps 0.0025 iteration   7
+AICc 227495.6 logPost -113984. logLik -113715. edf 32.390 eps 0.0016 iteration   8
+AICc 227495.3 logPost -113967. logLik -113715. edf 32.392 eps 0.0011 iteration   9
+AICc 227495.1 logPost -113967. logLik -113715. edf 32.396 eps 0.0008 iteration  10
+AICc 227495.0 logPost -113966. logLik -113715. edf 32.400 eps 0.0006 iteration  11
+AICc 227494.9 logPost -113966. logLik -113714. edf 32.403 eps 0.0004 iteration  12
+AICc 227494.8 logPost -113966. logLik -113714. edf 32.406 eps 0.0003 iteration  13
+AICc 227494.8 logPost -113966. logLik -113714. edf 32.408 eps 0.0002 iteration  14
+AICc 227494.8 logPost -113966. logLik -113714. edf 32.409 eps 0.0002 iteration  15
+AICc 227494.8 logPost -113966. logLik -113714. edf 32.410 eps 0.0001 iteration  16
+AICc 227494.7 logPost -113966. logLik -113714. edf 32.411 eps 0.0001 iteration  17
+AICc 227494.7 logPost -113966. logLik -113714. edf 32.412 eps 0.0001 iteration  18
+AICc 227494.7 logPost -113966. logLik -113714. edf 32.412 eps 0.0001 iteration  18
+elapsed time:  5.29sec
+Starting the sampler...
+
+|                    |   0% 32.25sec
+|*                   |   5% 33.08sec  1.74sec
+|**                  |  10% 29.75sec  3.31sec
+|***                 |  15% 27.68sec  4.88sec
+|****                |  20% 27.38sec  6.84sec
+|*****               |  25% 26.43sec  8.81sec
+|******              |  30% 25.39sec 10.88sec
+|*******             |  35% 23.87sec 12.85sec
+|********            |  40% 22.33sec 14.89sec
+|*********           |  45% 20.78sec 17.00sec
+|**********          |  50% 18.96sec 18.96sec
+|***********         |  55% 17.23sec 21.06sec
+|************        |  60% 15.34sec 23.01sec
+|*************       |  65% 13.52sec 25.10sec
+|**************      |  70% 11.59sec 27.04sec
+|***************     |  75%  9.71sec 29.13sec
+|****************    |  80%  7.78sec 31.10sec
+|*****************   |  85%  5.85sec 33.18sec
+|******************  |  90%  3.91sec 35.15sec
+|******************* |  95%  1.96sec 37.22sec
+|********************| 100%  0.00sec 39.16sec</code></pre>
+</div>
+</div>
+<p>A first glance at the model:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="skript_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>It is interesting to see that both the mean and variance (or standard deviation) of the number of parts increases gradually with time. The strategy to release sets with more parts and increasing the variance at the same time thus does not seem to be a sudden decision, but instead a strategy that has been adjusted gradually. This is of course just a first look at the data and conclusions have to be regarded cautiously.</p>
+</section>
+<section id="final-plot" class="level3">
+<h3 class="anchored" data-anchor-id="final-plot">Final Plot</h3>
+<p>Now, I finally take the first plot and make a visually (somewhat) nice plot out of it.</p>
+<hr>
+<p>Full R code available on <a href="https://github.com/jgranna/tidytuesday/tree/main/2022-09-06">Github</a>.</p>
+<hr>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li><p><code>colorspace</code><strong>-package</strong>:<br>
+<a href="https://colorspace.r-forge.r-project.org/index.html" class="uri">https://colorspace.r-forge.r-project.org/index.html</a></p></li>
+<li><p><code>knitr</code><strong>-package</strong>:<br>
+<a href="https://yihui.org/knitr/" class="uri">https://yihui.org/knitr/</a></p></li>
+<li><p><code>sf</code><strong>-package</strong>:<br>
+<a href="https://r-spatial.github.io/sf/" class="uri">https://r-spatial.github.io/sf/</a></p></li>
+<li><p><code>rnaturalearth</code><strong>-package</strong>:<br>
+<a href="https://docs.ropensci.org/rnaturalearth/" class="uri">https://docs.ropensci.org/rnaturalearth/</a></p></li>
+<li><p><code>ggpattern</code><strong>-package</strong>:<br>
+<a href="https://coolbutuseless.github.io/package/ggpattern/index.html" class="uri">https://coolbutuseless.github.io/package/ggpattern/index.html</a></p></li>
+<li><p><code>showtext</code><strong>-package</strong>:<br>
+<a href="https://cran.r-project.org/web/packages/showtext/index.html" class="uri">https://cran.r-project.org/web/packages/showtext/index.html</a></p></li>
+<li><p><code>ggtext</code>-<strong>-package</strong>: <a href="https://wilkelab.org/ggtext/" class="uri">https://wilkelab.org/ggtext/</a></p></li>
+</ul>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

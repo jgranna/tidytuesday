@@ -20,7 +20,8 @@ The purpose of these posts is mainly for exercising purposes. Thus, the provided
 
 ```{r, include=FALSE, eval=TRUE}
 #knitr::opts_chunk$set(fig.width=4, fig.height=2.5) 
-load('~/pell.rda')
+# load locally to save requests on TT server
+load('pell.rda')
 ```
 
 ```{r}
@@ -127,7 +128,9 @@ ggplot(a) +
                                  barwidth = 20, barheight = 0.5,
                                   title.hjust = .5)) 
 ```
+
 It is apparant that students in California have received the most money from the Pell Grant, more than 40 billion USD between 1999 and 2017. A close look at the number of universities / colleges reveals why that is the case (or at least part of the reason):
+
 ```{r}
 kable(
   head(
@@ -135,33 +138,33 @@ kable(
   )
 )
 ```
-California has by far the most universities / colleges in the country. Other states that show higher numbers in schools also receive more money from the Pell Grant. 
 
---------------------------------------------------
+California has by far the most universities / colleges in the country. Other states that show higher numbers in schools also receive more money from the Pell Grant.
+
+------------------------------------------------------------------------
 
 Full R code available on [Github](https://github.com/jgranna/tidytuesday/tree/main/2022-08-30).
 
---------------------------------------------------
+------------------------------------------------------------------------
 
 ## References
 
-- `colorspace`**-package**:  
-<https://colorspace.r-forge.r-project.org/index.html>
+-   `colorspace`**-package**:\
+    <https://colorspace.r-forge.r-project.org/index.html>
 
-- `knitr`**-package**:  
-<https://yihui.org/knitr/>
+-   `knitr`**-package**:\
+    <https://yihui.org/knitr/>
 
-- `sf`**-package**:  
-<https://r-spatial.github.io/sf/>
+-   `sf`**-package**:\
+    <https://r-spatial.github.io/sf/>
 
-- `rnaturalearth`**-package**:  
-<https://docs.ropensci.org/rnaturalearth/>
+-   `rnaturalearth`**-package**:\
+    <https://docs.ropensci.org/rnaturalearth/>
 
-- `ggpattern`**-package**:  
-<https://coolbutuseless.github.io/package/ggpattern/index.html>
+-   `ggpattern`**-package**:\
+    <https://coolbutuseless.github.io/package/ggpattern/index.html>
 
-- `showtext`**-package**:  
-<https://cran.r-project.org/web/packages/showtext/index.html>
+-   `showtext`**-package**:\
+    <https://cran.r-project.org/web/packages/showtext/index.html>
 
-- `ggtext`-**-package**:
-<https://wilkelab.org/ggtext/>
+-   `ggtext`-**-package**: <https://wilkelab.org/ggtext/>

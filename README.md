@@ -11,3 +11,4 @@
 2021-06-15: Commercial Fishing
 2021-06-29: Canadian Heatwave
 2021-07-06: Independence Days
+2022-09-06: LEGO Sets
